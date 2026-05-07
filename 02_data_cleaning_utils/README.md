@@ -1,43 +1,31 @@
-# 🧹 Data Cleaning Utilities
+# 🧹 Data Cleaning Utils — Utilidades de Limpieza de Datos
 
-Librería Python con funciones reutilizables para **limpieza y preprocesamiento de datos**, diseñada para proyectos de Data Science y Machine Learning.
+Librería Python reutilizable con funciones y clases para limpiar datos de forma estandarizada antes de entrenar modelos de Machine Learning.
 
-## ✨ Funcionalidades
+## 📁 Estructura
 
-| Módulo | Funciones |
-|--------|-----------|
-| **Nulos** | `report_nulls`, `fill_nulls_smart`, `drop_high_null_columns` |
-| **Duplicados** | `remove_duplicates` |
-| **Escalado** | `normalize_columns` (MinMax, StandardScaler, Log) |
-| **Encoding** | `encode_categoricals` (One-Hot, Label) |
-| **Texto** | `clean_text_column` |
-| **Fechas** | `parse_dates` (extrae año, mes, día, etc.) |
-| **Outliers** | `remove_outliers_iqr`, `cap_outliers` |
-| **Pipeline** | `full_cleaning_pipeline` |
+```
+02_data_cleaning_utils/
+├── data_cleaning.py    # Librería principal de limpieza
+└── README.md
+```
 
-## 🚀 Uso Rápido
+## ⚙️ Funciones Incluidas
+
+| Función | Descripción |
+|---------|-------------|
+| `handle_nulls(df, strategy)` | Imputa nulos con media, mediana o moda |
+| `remove_duplicates(df)` | Elimina filas 100% duplicadas |
+| `fix_dtypes(df)` | Convierte columnas a sus tipos correctos |
+| `cap_outliers(df, cols)` | Aplica capping (IQR) a outliers extremos |
+| `encode_categoricals(df)` | Codifica variables categóricas (Label / One-Hot) |
+| `normalize_numerics(df)` | Escala variables numéricas (Standard / MinMax) |
+
+## 🚀 Uso
 
 ```python
-from data_cleaning import full_cleaning_pipeline, report_nulls
+from data_cleaning import DataCleaner
 
-# Ver nulos
-print(report_nulls(df))
-
-# Limpieza completa en un paso
-df_clean = full_cleaning_pipeline(
-    df,
-    null_strategy='auto',     # media/moda según tipo
-    encoding_method='label',  # codificación de categóricas
-    normalize_method='minmax',# normalización [0,1]
-    remove_dups=True          # eliminar duplicados
-)
+cleaner = DataCleaner(df)
+df_clean = cleaner.run_pipeline()
 ```
-
-## 📦 Instalación
-
-```bash
-pip install pandas numpy scikit-learn
-```
-
----
-> **Autor:** Dody Dueñas | Data Analyst & Data Scientist

@@ -1,53 +1,38 @@
-# 🤖 Machine Learning Pipeline
+# 🤖 ML Pipeline — Pipeline Automatizado de Machine Learning
 
-Pipeline completo y reutilizable para proyectos de **Machine Learning** con Scikit-Learn. Compara múltiples modelos automáticamente y selecciona el mejor.
+Pipeline que entrena, evalúa y compara múltiples algoritmos de Machine Learning de forma automática con una sola llamada.
 
-## ✨ Características
+## 📁 Estructura
 
-- 🔄 Soporta **Clasificación** y **Regresión**
-- 📊 Compara **8 modelos de clasificación** y **7 de regresión** automáticamente
-- 📈 Validación cruzada (K-Fold) para todos los modelos
-- 🎯 Métricas completas: Accuracy, F1, Precision, Recall, R², RMSE, MAE
-- 📉 Visualizaciones: Ranking, Matriz de Confusión, Feature Importance
-- 🔍 Búsqueda de hiperparámetros con GridSearchCV
-- 💾 Guardado y carga de modelos con joblib
+```
+03_ml_pipeline/
+├── ml_pipeline.py    # Clase principal del pipeline
+└── README.md
+```
 
-## 🚀 Uso Rápido
+## 🏆 Modelos Comparados
+
+| Modelo | Tipo |
+|--------|------|
+| Logistic Regression | Clasificación lineal |
+| Decision Tree | Árbol de decisión |
+| Random Forest | Ensemble |
+| Gradient Boosting | Ensemble (boosting) |
+| SVM | Support Vector Machine |
+| K-Nearest Neighbors | Distancia |
+| Naive Bayes | Probabilístico |
+| XGBoost | Extreme Gradient Boosting |
+
+## ⚙️ Métricas Evaluadas
+
+`Accuracy` · `Precision` · `Recall` · `F1-Score` · `ROC-AUC` · `Cross-Validation`
+
+## 🚀 Uso
 
 ```python
 from ml_pipeline import MLPipeline
 
-# 1. Crear pipeline
-pipeline = MLPipeline(task='classification', scale=True)
-
-# 2. Preparar datos
-pipeline.prepare_data(X, y)
-
-# 3. Comparar modelos
-rankings = pipeline.compare_models()
-
-# 4. Visualizar resultados
-pipeline.plot_rankings()
-pipeline.plot_confusion_matrix()
-pipeline.plot_feature_importance(feature_names=X.columns.tolist())
-
-# 5. Guardar mejor modelo
-pipeline.save_model('mi_modelo.joblib')
+pipeline = MLPipeline(X_train, X_test, y_train, y_test)
+results = pipeline.compare_all_models()
+pipeline.plot_results()
 ```
-
-## 📊 Modelos incluidos
-
-### Clasificación
-`Logistic Regression`, `Decision Tree`, `Random Forest`, `Gradient Boosting`, `Extra Trees`, `SVM`, `KNN`, `Naive Bayes`
-
-### Regresión
-`Linear Regression`, `Ridge`, `Lasso`, `ElasticNet`, `Decision Tree`, `Random Forest`, `Gradient Boosting`
-
-## 📦 Instalación
-
-```bash
-pip install scikit-learn pandas numpy matplotlib seaborn joblib
-```
-
----
-> **Autor:** Dody Dueñas | Data Analyst & Data Scientist

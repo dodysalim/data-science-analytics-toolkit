@@ -1,57 +1,34 @@
-# 📐 Statistical Analysis Toolkit
+# 📐 Statistical Analysis Toolkit — Análisis Estadístico Avanzado
 
-Herramientas completas para **análisis estadístico descriptivo e inferencial** en Python. Ideal para proyectos de Data Science y reportes analíticos.
+Toolkit Python para realizar pruebas estadísticas formales, validar supuestos de modelos y comparar grupos de forma rigurosa.
 
-## ✨ Funcionalidades
+## 📁 Estructura
 
-### 📊 Estadística Descriptiva
-- `extended_describe()` → Media, mediana, moda, CV, skewness, kurtosis, IQR
+```
+05_statistical_analysis/
+├── statistical_analysis.py    # Toolkit principal
+└── README.md
+```
 
-### 🔬 Pruebas de Normalidad
-- `test_normality()` → Shapiro-Wilk, Kolmogorov-Smirnov, D'Agostino-Pearson con consenso automático
+## 🧪 Análisis Incluidos
 
-### 🧪 Pruebas de Hipótesis
-| Función | Prueba | Tipo |
-|---------|--------|------|
-| `one_sample_ttest()` | T-Test una muestra | Paramétrico |
-| `two_sample_ttest()` | T-Test dos muestras (Welch/Student) | Paramétrico |
-| `anova_test()` | ANOVA de una vía | Paramétrico |
-| `chi2_test()` | Chi-cuadrado de independencia | No paramétrico |
-| `mann_whitney_test()` | Mann-Whitney U | No paramétrico |
+| Análisis | Descripción |
+|----------|-------------|
+| Test de Normalidad (Shapiro-Wilk) | ¿Sigue la variable una distribución normal? |
+| Test de Normalidad (KS-Test) | Kolmogorov-Smirnov para muestras grandes |
+| Test T de Student | Comparación de medias entre dos grupos |
+| ANOVA | Comparación de medias entre tres o más grupos |
+| Mann-Whitney U | Alternativa no paramétrica al T-Test |
+| Chi-Cuadrado | Independencia entre variables categóricas |
+| Correlación (Pearson/Spearman) | Fuerza y dirección de la relación |
+| Intervalo de Confianza | Estimación del parámetro poblacional |
 
-### 📏 Intervalos de Confianza
-- `confidence_interval()` → IC para la media con T de Student
-
-### 🔗 Correlación con Significancia
-- `correlation_analysis()` → Pearson, Spearman, Kendall con p-values
-
-### 🎨 Visualizaciones
-- `plot_normality_check()` → Histograma + Q-Q Plot + Boxplot + Violin
-- `plot_hypothesis_comparison()` → Comparación visual de dos grupos
-
-## 🚀 Uso Rápido
+## 🚀 Uso
 
 ```python
-from statistical_analysis import *
+from statistical_analysis import StatisticalAnalyzer
 
-# Estadísticas descriptivas
-extended_describe(df['ventas'])
-
-# Prueba de normalidad
-test_normality(df['ventas'])
-
-# Comparar dos grupos
-two_sample_ttest(grupo_A, grupo_B, alpha=0.05)
-
-# Visualizar normalidad
-plot_normality_check(df['ventas'])
+analyzer = StatisticalAnalyzer(df)
+analyzer.normality_test(column="age")
+analyzer.ttest(group_col="survived", value_col="fare")
 ```
-
-## 📦 Instalación
-
-```bash
-pip install pandas numpy scipy matplotlib seaborn scikit-learn
-```
-
----
-> **Autor:** Dody Dueñas | Data Analyst & Data Scientist

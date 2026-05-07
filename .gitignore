@@ -1,0 +1,17 @@
+# Archivos grandes de datos
+*.csv
+!06_customer_support_analysis/data/*.csv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Outputs generados
+06_customer_support_analysis/output/
+06_customer_support_analysis/reports/
