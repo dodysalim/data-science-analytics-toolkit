@@ -1,6 +1,5 @@
-# Archivos grandes de datos
-*.csv
-!06_customer_support_analysis/data/*.csv
+# Archivos grandes de datos — rastreados via Git LFS
+# (ver .gitattributes para la configuración de LFS)
 
 # Python
 __pycache__/
