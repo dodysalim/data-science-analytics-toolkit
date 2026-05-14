@@ -132,23 +132,18 @@ Power analysis, pruebas Z/T/Mann-Whitney/Chi-cuadrado, análisis Bayesiano Beta-
 
 ```bash
 # 1. Instalar dependencias
-pip install pandas numpy scikit-learn matplotlib seaborn scipy statsmodels streamlit
+pip install -r requirements.txt
 
-# 2. Lanzar el dashboard interactivo
-python -m streamlit run dashboard.py
+# 2. Lanzar el dashboard interactivo localmente
+python -m streamlit run src/app/dashboard.py
 
-# 3. O correr la demo completa en consola
-python -X utf8 demo_proyecto_completo.py
+# 3. O correr el pipeline analítico completo en consola (Arquitectura SOLID)
+python -X utf8 src/main.py
 ```
 
 ---
 
-## 📊 Demostración
+## 🌐 Dashboard en Vivo (Cloud Deployment)
+Puedes interactuar con el análisis de datos de soporte al cliente directamente en la nube sin instalar nada.
+👉 **[Ver el Dashboard Interactivo en Streamlit](https://data-science-analytics-toolkit-emhnwgam9hemykfa8qe38r.streamlit.app/)**
 
-Cada módulo tiene su propio bloque `if __name__ == "__main__":` para ejecutarse de forma independiente:
-
-```bash
-python 07_time_series/time_series_analyzer.py
-python 12_data_profiling/data_profiling.py
-python 13_ab_testing/ab_testing.py
-```
