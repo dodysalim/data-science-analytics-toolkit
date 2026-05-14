@@ -1,15 +1,15 @@
 """
-Model Evaluation & Reporting Toolkit
-======================================
-Comprehensive evaluation suite for classification and regression models:
-- Cross-validation with multiple metrics
-- Confusion matrix analysis
-- ROC/PR curve computation
-- Calibration assessment
-- Regression error diagnostics
-- Automated HTML/text report generation
+Kit de Evaluación de Modelos e Informes
+=========================================
+Suite completa de evaluación para modelos de clasificación y regresión:
+- Validación cruzada con múltiples métricas
+- Análisis de matriz de confusión
+- Cálculo de curvas ROC y PR
+- Evaluación de calibración
+- Diagnóstico de errores de regresión
+- Generación automática de informes HTML/texto
 
-Author: Data Science Analytics Toolkit
+Autor: Dody Dueñas
 """
 
 import numpy as np
@@ -29,25 +29,25 @@ warnings.filterwarnings("ignore")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# CLASSIFICATION EVALUATOR
+# EVALUADOR DE CLASIFICACIÓN
 # ──────────────────────────────────────────────────────────────────────────────
 
 class ClassificationEvaluator:
     """
-    Full evaluation suite for binary and multi-class classifiers.
+    Suite completa de evaluación para clasificadores binarios y multiclase.
 
-    Methods
+    Métodos
     -------
     evaluate(y_true, y_pred, y_proba)
-        Compute all classification metrics.
-    cross_validate_model(model, X, y, cv, scoring)
-        Run stratified k-fold cross-validation.
+        Calcula todas las métricas de clasificación.
+    cross_validate_model(modelo, X, y, cv, scoring)
+        Ejecuta validación cruzada estratificada k-fold.
     confusion_matrix_analysis(y_true, y_pred)
-        Detailed confusion matrix with per-class precision, recall, F1.
+        Matriz de confusión detallada con precisión, recall y F1 por clase.
     roc_analysis(y_true, y_proba)
-        ROC curve data (binary only).
+        Datos de la curva ROC (solo binario).
     pr_analysis(y_true, y_proba)
-        Precision-recall curve data (binary only).
+        Datos de la curva Precisión-Recall (solo binario).
     """
 
     def evaluate(
@@ -55,200 +55,200 @@ class ClassificationEvaluator:
         y_true: np.ndarray,
         y_pred: np.ndarray,
         y_proba: Optional[np.ndarray] = None,
-        average: str = "weighted",
+        promedio: str = "weighted",
     ) -> Dict[str, float]:
         """
-        Compute classification metrics.
+        Calcula métricas de clasificación.
 
-        Parameters
+        Parámetros
         ----------
         y_true : array-like
-            Ground truth labels.
+            Etiquetas reales.
         y_pred : array-like
-            Predicted labels.
-        y_proba : array-like, optional
-            Predicted probabilities (needed for ROC-AUC).
-        average : str
-            Averaging strategy for multi-class ('weighted', 'macro', 'micro').
+            Etiquetas predichas.
+        y_proba : array-like, opcional
+            Probabilidades predichas (necesarias para ROC-AUC).
+        promedio : str
+            Estrategia de promedio para multiclase ('weighted', 'macro', 'micro').
 
-        Returns
+        Retorna
         -------
         dict
-            Dictionary of metric name → value.
+            Diccionario de nombre de métrica → valor.
         """
-        metrics: Dict[str, float] = {
-            "accuracy": accuracy_score(y_true, y_pred),
-            "precision": precision_score(y_true, y_pred, average=average, zero_division=0),
-            "recall": recall_score(y_true, y_pred, average=average, zero_division=0),
-            "f1_score": f1_score(y_true, y_pred, average=average, zero_division=0),
+        metricas: Dict[str, float] = {
+            "exactitud": accuracy_score(y_true, y_pred),
+            "precision": precision_score(y_true, y_pred, average=promedio, zero_division=0),
+            "recall": recall_score(y_true, y_pred, average=promedio, zero_division=0),
+            "f1_score": f1_score(y_true, y_pred, average=promedio, zero_division=0),
         }
         if y_proba is not None:
             try:
                 if len(np.unique(y_true)) == 2:
                     proba_1d = y_proba[:, 1] if y_proba.ndim == 2 else y_proba
-                    metrics["roc_auc"] = roc_auc_score(y_true, proba_1d)
-                    metrics["avg_precision"] = average_precision_score(y_true, proba_1d)
+                    metricas["roc_auc"] = roc_auc_score(y_true, proba_1d)
+                    metricas["precision_promedio"] = average_precision_score(y_true, proba_1d)
                 else:
-                    metrics["roc_auc_ovr"] = roc_auc_score(
-                        y_true, y_proba, multi_class="ovr", average=average
+                    metricas["roc_auc_ovr"] = roc_auc_score(
+                        y_true, y_proba, multi_class="ovr", average=promedio
                     )
             except Exception:
                 pass
-        return metrics
+        return metricas
 
     def cross_validate_model(
         self,
-        model: Any,
+        modelo: Any,
         X: np.ndarray,
         y: np.ndarray,
         cv: int = 5,
         scoring: Optional[List[str]] = None,
-        stratified: bool = True,
+        estratificado: bool = True,
     ) -> pd.DataFrame:
         """
-        Run cross-validation and return per-fold metrics.
+        Ejecuta validación cruzada y retorna métricas por fold.
 
-        Parameters
+        Parámetros
         ----------
-        model : sklearn estimator
-            Any fitted or unfitted sklearn-compatible model.
+        modelo : estimador sklearn
+            Cualquier modelo compatible con sklearn (ajustado o no).
         X : array-like
-            Feature matrix.
+            Matriz de características.
         y : array-like
-            Target vector.
+            Vector objetivo.
         cv : int
-            Number of folds.
-        scoring : list of str, optional
-            Sklearn scoring names. Defaults to accuracy, f1_weighted, roc_auc.
-        stratified : bool
-            Use StratifiedKFold (True) or KFold (False).
+            Número de folds.
+        scoring : lista de str, opcional
+            Nombres de métricas de sklearn. Por defecto: exactitud, f1_weighted, roc_auc.
+        estratificado : bool
+            Usar StratifiedKFold (True) o KFold (False).
 
-        Returns
+        Retorna
         -------
         pd.DataFrame
-            Mean ± std for each metric across folds.
+            Media ± desv. estándar de cada métrica por fold.
         """
         if scoring is None:
             scoring = ["accuracy", "f1_weighted", "roc_auc"]
-        splitter = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42) if stratified \
+        divisor = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42) if estratificado \
             else KFold(n_splits=cv, shuffle=True, random_state=42)
-        cv_results = cross_validate(model, X, y, cv=splitter, scoring=scoring, return_train_score=True)
-        summary = {}
-        for key, values in cv_results.items():
-            if key.startswith("test_") or key.startswith("train_"):
-                summary[f"{key}_mean"] = values.mean()
-                summary[f"{key}_std"] = values.std()
-        return pd.Series(summary).to_frame("value").round(4)
+        cv_resultados = cross_validate(modelo, X, y, cv=divisor, scoring=scoring, return_train_score=True)
+        resumen = {}
+        for clave, valores in cv_resultados.items():
+            if clave.startswith("test_") or clave.startswith("train_"):
+                resumen[f"{clave}_media"] = valores.mean()
+                resumen[f"{clave}_std"] = valores.std()
+        return pd.Series(resumen).to_frame("valor").round(4)
 
     def confusion_matrix_analysis(
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        labels: Optional[List[str]] = None,
+        etiquetas: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
-        Detailed confusion matrix analysis.
+        Análisis detallado de la matriz de confusión.
 
-        Returns
+        Retorna
         -------
-        dict with keys: 'matrix' (pd.DataFrame), 'report' (str), 'normalized' (pd.DataFrame)
+        dict con claves: 'matrix' (pd.DataFrame), 'report' (str), 'normalized' (pd.DataFrame)
         """
         cm = confusion_matrix(y_true, y_pred)
-        label_names = labels or sorted(np.unique(y_true).tolist())
-        cm_df = pd.DataFrame(cm, index=label_names, columns=label_names)
+        nombres_etiquetas = etiquetas or sorted(np.unique(y_true).tolist())
+        cm_df = pd.DataFrame(cm, index=nombres_etiquetas, columns=nombres_etiquetas)
         cm_norm = cm_df.div(cm_df.sum(axis=1), axis=0).round(3)
-        report = classification_report(y_true, y_pred, target_names=[str(l) for l in label_names])
-        return {"matrix": cm_df, "normalized": cm_norm, "report": report}
+        informe = classification_report(y_true, y_pred, target_names=[str(l) for l in nombres_etiquetas])
+        return {"matrix": cm_df, "normalized": cm_norm, "report": informe}
 
     def roc_analysis(
         self, y_true: np.ndarray, y_proba: np.ndarray
     ) -> Dict[str, Any]:
         """
-        Compute ROC curve data for binary classification.
+        Calcula los datos de la curva ROC para clasificación binaria.
 
-        Returns
+        Retorna
         -------
-        dict with 'fpr', 'tpr', 'thresholds', 'auc'
+        dict con 'fpr', 'tpr', 'umbrales', 'auc'
         """
         proba_1d = y_proba[:, 1] if y_proba.ndim == 2 else y_proba
-        fpr, tpr, thresholds = roc_curve(y_true, proba_1d)
+        fpr, tpr, umbrales = roc_curve(y_true, proba_1d)
         auc = roc_auc_score(y_true, proba_1d)
-        return {"fpr": fpr, "tpr": tpr, "thresholds": thresholds, "auc": auc}
+        return {"fpr": fpr, "tpr": tpr, "umbrales": umbrales, "auc": auc}
 
     def pr_analysis(
         self, y_true: np.ndarray, y_proba: np.ndarray
     ) -> Dict[str, Any]:
         """
-        Compute Precision-Recall curve data for binary classification.
+        Calcula los datos de la curva Precisión-Recall para clasificación binaria.
 
-        Returns
+        Retorna
         -------
-        dict with 'precision', 'recall', 'thresholds', 'avg_precision'
+        dict con 'precision', 'recall', 'umbrales', 'precision_promedio'
         """
         proba_1d = y_proba[:, 1] if y_proba.ndim == 2 else y_proba
-        precision, recall, thresholds = precision_recall_curve(y_true, proba_1d)
-        avg_prec = average_precision_score(y_true, proba_1d)
+        precision, recall, umbrales = precision_recall_curve(y_true, proba_1d)
+        prec_prom = average_precision_score(y_true, proba_1d)
         return {
             "precision": precision,
             "recall": recall,
-            "thresholds": thresholds,
-            "avg_precision": avg_prec,
+            "umbrales": umbrales,
+            "precision_promedio": prec_prom,
         }
 
     def calibration_analysis(
         self, y_true: np.ndarray, y_proba: np.ndarray, n_bins: int = 10
     ) -> pd.DataFrame:
         """
-        Compute calibration curve (fraction of positives vs mean predicted probability).
+        Calcula la curva de calibración (fracción de positivos vs probabilidad media predicha).
 
-        Returns
+        Retorna
         -------
-        pd.DataFrame with columns: mean_predicted_prob, fraction_of_positives
+        pd.DataFrame con columnas: prob_predicha_media, fraccion_positivos
         """
         proba_1d = y_proba[:, 1] if y_proba.ndim == 2 else y_proba
-        fraction_pos, mean_pred = calibration_curve(y_true, proba_1d, n_bins=n_bins)
+        fraccion_pos, media_pred = calibration_curve(y_true, proba_1d, n_bins=n_bins)
         return pd.DataFrame({
-            "mean_predicted_prob": mean_pred,
-            "fraction_of_positives": fraction_pos,
+            "prob_predicha_media": media_pred,
+            "fraccion_positivos": fraccion_pos,
         })
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# REGRESSION EVALUATOR
+# EVALUADOR DE REGRESIÓN
 # ──────────────────────────────────────────────────────────────────────────────
 
 class RegressionEvaluator:
     """
-    Full evaluation suite for regression models.
+    Suite completa de evaluación para modelos de regresión.
 
-    Metrics: MAE, MSE, RMSE, MAPE, R², Adjusted R², residual diagnostics.
+    Métricas: MAE, MSE, RMSE, MAPE, R², R² ajustado, diagnóstico de residuos.
     """
 
     def evaluate(
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        n_features: int = 1,
+        n_caracteristicas: int = 1,
     ) -> Dict[str, float]:
         """
-        Compute regression metrics.
+        Calcula métricas de regresión.
 
-        Parameters
+        Parámetros
         ----------
         y_true : array-like
-            Ground truth values.
+            Valores reales.
         y_pred : array-like
-            Predicted values.
-        n_features : int
-            Number of features (needed for adjusted R²).
+            Valores predichos.
+        n_caracteristicas : int
+            Número de características (necesario para R² ajustado).
 
-        Returns
+        Retorna
         -------
-        dict of metric → value
+        dict de métrica → valor
         """
         n = len(y_true)
         r2 = r2_score(y_true, y_pred)
-        adj_r2 = 1 - (1 - r2) * (n - 1) / (n - n_features - 1) if n > n_features + 1 else np.nan
+        r2_ajust = 1 - (1 - r2) * (n - 1) / (n - n_caracteristicas - 1) if n > n_caracteristicas + 1 else np.nan
         mae = mean_absolute_error(y_true, y_pred)
         mse = mean_squared_error(y_true, y_pred)
         return {
@@ -257,178 +257,178 @@ class RegressionEvaluator:
             "RMSE": np.sqrt(mse),
             "MAPE": mean_absolute_percentage_error(y_true, y_pred),
             "R2": r2,
-            "Adjusted_R2": adj_r2,
+            "R2_ajustado": r2_ajust,
         }
 
-    def residual_analysis(
+    def analisis_residuos(
         self, y_true: np.ndarray, y_pred: np.ndarray
     ) -> pd.DataFrame:
         """
-        Compute residuals and diagnostics.
+        Calcula los residuos y diagnósticos.
 
-        Returns
+        Retorna
         -------
-        pd.DataFrame with: actual, predicted, residual, abs_error, pct_error
+        pd.DataFrame con: real, predicho, residuo, error_abs, error_pct
         """
-        residuals = y_true - y_pred
+        residuos = y_true - y_pred
         return pd.DataFrame({
-            "actual": y_true,
-            "predicted": y_pred,
-            "residual": residuals,
-            "abs_error": np.abs(residuals),
-            "pct_error": np.abs(residuals / np.where(y_true == 0, 1e-10, y_true)) * 100,
+            "real": y_true,
+            "predicho": y_pred,
+            "residuo": residuos,
+            "error_abs": np.abs(residuos),
+            "error_pct": np.abs(residuos / np.where(y_true == 0, 1e-10, y_true)) * 100,
         })
 
     def cross_validate_model(
         self,
-        model: Any,
+        modelo: Any,
         X: np.ndarray,
         y: np.ndarray,
         cv: int = 5,
         scoring: Optional[List[str]] = None,
     ) -> pd.DataFrame:
-        """Run k-fold cross-validation for regression models."""
+        """Ejecuta validación cruzada k-fold para modelos de regresión."""
         if scoring is None:
             scoring = ["r2", "neg_mean_absolute_error", "neg_root_mean_squared_error"]
-        cv_results = cross_validate(
-            model, X, y,
+        cv_resultados = cross_validate(
+            modelo, X, y,
             cv=KFold(n_splits=cv, shuffle=True, random_state=42),
             scoring=scoring,
             return_train_score=True,
         )
-        summary = {}
-        for key, values in cv_results.items():
-            if key.startswith("test_") or key.startswith("train_"):
-                summary[f"{key}_mean"] = values.mean()
-                summary[f"{key}_std"] = values.std()
-        return pd.Series(summary).to_frame("value").round(4)
+        resumen = {}
+        for clave, valores in cv_resultados.items():
+            if clave.startswith("test_") or clave.startswith("train_"):
+                resumen[f"{clave}_media"] = valores.mean()
+                resumen[f"{clave}_std"] = valores.std()
+        return pd.Series(resumen).to_frame("valor").round(4)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MODEL COMPARISON
+# COMPARADOR DE MODELOS
 # ──────────────────────────────────────────────────────────────────────────────
 
 class ModelComparator:
     """
-    Compare multiple models using cross-validation and produce a ranked report.
+    Compara múltiples modelos mediante validación cruzada y genera una tabla clasificatoria.
     """
 
     def __init__(self, task: str = "classification", cv: int = 5):
         self.task = task
         self.cv = cv
-        self._results: Dict[str, pd.Series] = {}
+        self._resultados: Dict[str, pd.Series] = {}
 
     def add_model(
-        self, name: str, model: Any, X: np.ndarray, y: np.ndarray
+        self, nombre: str, modelo: Any, X: np.ndarray, y: np.ndarray
     ) -> "ModelComparator":
         """
-        Add a model to the comparison.
+        Agrega un modelo a la comparación.
 
-        Parameters
+        Parámetros
         ----------
-        name : str
-            Display name for the model.
-        model : sklearn estimator
-        X, y : training data
+        nombre : str
+            Nombre de visualización del modelo.
+        modelo : estimador sklearn
+        X, y : datos de entrenamiento
 
-        Returns
+        Retorna
         -------
-        self (for method chaining)
+        self (para encadenamiento de métodos)
         """
         if self.task == "classification":
-            evaluator = ClassificationEvaluator()
-            cv_df = evaluator.cross_validate_model(model, X, y, cv=self.cv)
+            evaluador = ClassificationEvaluator()
+            cv_df = evaluador.cross_validate_model(modelo, X, y, cv=self.cv)
         else:
-            evaluator = RegressionEvaluator()
-            cv_df = evaluator.cross_validate_model(model, X, y, cv=self.cv)
-        self._results[name] = cv_df["value"]
+            evaluador = RegressionEvaluator()
+            cv_df = evaluador.cross_validate_model(modelo, X, y, cv=self.cv)
+        self._resultados[nombre] = cv_df["valor"]
         return self
 
     def leaderboard(self) -> pd.DataFrame:
-        """Return a sorted comparison table of all added models."""
-        if not self._results:
-            raise ValueError("No models added. Call add_model() first.")
-        board = pd.DataFrame(self._results).T
-        sort_col = (
-            "test_roc_auc_mean" if "test_roc_auc_mean" in board.columns
-            else "test_r2_mean" if "test_r2_mean" in board.columns
-            else board.columns[0]
+        """Retorna una tabla comparativa ordenada de todos los modelos agregados."""
+        if not self._resultados:
+            raise ValueError("No se agregaron modelos. Llame a add_model() primero.")
+        tabla = pd.DataFrame(self._resultados).T
+        col_orden = (
+            "test_roc_auc_media" if "test_roc_auc_media" in tabla.columns
+            else "test_r2_media" if "test_r2_media" in tabla.columns
+            else tabla.columns[0]
         )
-        return board.sort_values(sort_col, ascending=False)
+        return tabla.sort_values(col_orden, ascending=False)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# REPORT GENERATOR
+# GENERADOR DE INFORMES
 # ──────────────────────────────────────────────────────────────────────────────
 
 class ReportGenerator:
-    """Generate a plain-text or Markdown evaluation report."""
+    """Genera informes de evaluación en texto plano o Markdown."""
 
     def classification_report_md(
         self,
-        model_name: str,
-        metrics: Dict[str, float],
-        cm_analysis: Dict[str, Any],
+        nombre_modelo: str,
+        metricas: Dict[str, float],
+        analisis_cm: Dict[str, Any],
     ) -> str:
         """
-        Generate a Markdown-formatted classification report.
+        Genera un informe de clasificación en formato Markdown.
 
-        Parameters
+        Parámetros
         ----------
-        model_name : str
-        metrics : dict
-            Output from ClassificationEvaluator.evaluate()
-        cm_analysis : dict
-            Output from ClassificationEvaluator.confusion_matrix_analysis()
+        nombre_modelo : str
+        metricas : dict
+            Salida de ClassificationEvaluator.evaluate()
+        analisis_cm : dict
+            Salida de ClassificationEvaluator.confusion_matrix_analysis()
 
-        Returns
+        Retorna
         -------
-        str — Markdown report
+        str — Informe Markdown
         """
-        lines = [
-            f"# Evaluation Report: {model_name}",
+        lineas = [
+            f"# Informe de Evaluación: {nombre_modelo}",
             "",
-            "## Performance Metrics",
+            "## Métricas de Desempeño",
             "",
-            "| Metric | Value |",
-            "|--------|-------|",
+            "| Métrica | Valor |",
+            "|---------|-------|",
         ]
-        for metric, value in metrics.items():
-            lines.append(f"| {metric} | {value:.4f} |")
-        lines += [
+        for metrica, valor in metricas.items():
+            lineas.append(f"| {metrica} | {valor:.4f} |")
+        lineas += [
             "",
-            "## Classification Report",
+            "## Informe de Clasificación",
             "",
             "```",
-            cm_analysis["report"],
+            analisis_cm["report"],
             "```",
             "",
-            "## Confusion Matrix",
+            "## Matriz de Confusión",
             "",
-            cm_analysis["matrix"].to_markdown() if hasattr(cm_analysis["matrix"], "to_markdown")
-            else str(cm_analysis["matrix"]),
+            analisis_cm["matrix"].to_markdown() if hasattr(analisis_cm["matrix"], "to_markdown")
+            else str(analisis_cm["matrix"]),
         ]
-        return "\n".join(lines)
+        return "\n".join(lineas)
 
     def regression_report_md(
-        self, model_name: str, metrics: Dict[str, float]
+        self, nombre_modelo: str, metricas: Dict[str, float]
     ) -> str:
-        """Generate a Markdown-formatted regression report."""
-        lines = [
-            f"# Regression Evaluation Report: {model_name}",
+        """Genera un informe de regresión en formato Markdown."""
+        lineas = [
+            f"# Informe de Evaluación de Regresión: {nombre_modelo}",
             "",
-            "## Performance Metrics",
+            "## Métricas de Desempeño",
             "",
-            "| Metric | Value |",
-            "|--------|-------|",
+            "| Métrica | Valor |",
+            "|---------|-------|",
         ]
-        for metric, value in metrics.items():
-            lines.append(f"| {metric} | {value:.6f} |")
-        return "\n".join(lines)
+        for metrica, valor in metricas.items():
+            lineas.append(f"| {metrica} | {valor:.6f} |")
+        return "\n".join(lineas)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Demo
+# Demostración
 # ──────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     from sklearn.datasets import make_classification
@@ -444,22 +444,22 @@ if __name__ == "__main__":
     y_pred = rf.predict(X_test)
     y_proba = rf.predict_proba(X_test)
 
-    evaluator = ClassificationEvaluator()
-    metrics = evaluator.evaluate(y_test, y_pred, y_proba)
-    cm_analysis = evaluator.confusion_matrix_analysis(y_test, y_pred)
+    evaluador = ClassificationEvaluator()
+    metricas = evaluador.evaluate(y_test, y_pred, y_proba)
+    analisis_cm = evaluador.confusion_matrix_analysis(y_test, y_pred)
 
-    print("=== Metrics ===")
-    for k, v in metrics.items():
+    print("=== Métricas ===")
+    for k, v in metricas.items():
         print(f"  {k}: {v:.4f}")
 
-    print("\n=== Model Comparison ===")
-    comparator = ModelComparator(task="classification", cv=5)
-    comparator.add_model("RandomForest", RandomForestClassifier(n_estimators=50, random_state=42), X, y)
-    comparator.add_model("GradientBoosting", GradientBoostingClassifier(random_state=42), X, y)
-    comparator.add_model("LogisticRegression", LogisticRegression(max_iter=1000, random_state=42), X, y)
-    print(comparator.leaderboard())
+    print("\n=== Comparación de Modelos ===")
+    comparador = ModelComparator(task="classification", cv=5)
+    comparador.add_model("RandomForest", RandomForestClassifier(n_estimators=50, random_state=42), X, y)
+    comparador.add_model("GradientBoosting", GradientBoostingClassifier(random_state=42), X, y)
+    comparador.add_model("RegresionLogistica", LogisticRegression(max_iter=1000, random_state=42), X, y)
+    print(comparador.leaderboard())
 
-    reporter = ReportGenerator()
-    report_md = reporter.classification_report_md("RandomForest", metrics, cm_analysis)
-    print("\n=== Markdown Report (preview) ===")
-    print(report_md[:600])
+    generador = ReportGenerator()
+    informe_md = generador.classification_report_md("RandomForest", metricas, analisis_cm)
+    print("\n=== Vista Previa del Informe Markdown ===")
+    print(informe_md[:600])

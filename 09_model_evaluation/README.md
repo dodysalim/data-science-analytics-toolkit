@@ -1,34 +1,38 @@
-# 09 — Model Evaluation & Reporting Toolkit
+# 09 — Kit de Evaluación de Modelos
 
-Full evaluation suite for classification and regression models with cross-validation, ROC/PR curves, calibration analysis, and automated Markdown report generation.
+Suite completa de evaluación para modelos de clasificación y regresión: validación cruzada, curvas ROC/PR, análisis de calibración y generación automática de informes en Markdown.
 
-## Classes
+## Autor
 
-| Class | Description |
+**Dody Dueñas**
+
+## Clases
+
+| Clase | Descripción |
 |---|---|
-| `ClassificationEvaluator` | Accuracy, Precision, Recall, F1, ROC-AUC, Average Precision, confusion matrix, calibration |
-| `RegressionEvaluator` | MAE, MSE, RMSE, MAPE, R², Adjusted R², residual analysis |
-| `ModelComparator` | Compare multiple models via cross-validation leaderboard |
-| `ReportGenerator` | Auto-generate Markdown evaluation reports |
+| `ClassificationEvaluator` | Exactitud, Precisión, Recall, F1, ROC-AUC, Precisión Promedio, matriz de confusión, calibración |
+| `RegressionEvaluator` | MAE, MSE, RMSE, MAPE, R², R² ajustado, análisis de residuos |
+| `ModelComparator` | Compara múltiples modelos mediante tabla de clasificación con validación cruzada |
+| `ReportGenerator` | Genera automáticamente informes de evaluación en Markdown |
 
-## Usage
+## Uso
 
 ```python
 from model_evaluation import ClassificationEvaluator, ModelComparator
 
-evaluator = ClassificationEvaluator()
-metrics = evaluator.evaluate(y_test, y_pred, y_proba)
-cm = evaluator.confusion_matrix_analysis(y_test, y_pred)
-roc = evaluator.roc_analysis(y_test, y_proba)
+evaluador = ClassificationEvaluator()
+metricas = evaluador.evaluate(y_test, y_pred, y_proba)
+mc = evaluador.confusion_matrix_analysis(y_test, y_pred)
+roc = evaluador.roc_analysis(y_test, y_proba)
 
-# Compare models
-comparator = ModelComparator(task="classification", cv=5)
-comparator.add_model("RF", rf_model, X, y)
-comparator.add_model("GBT", gbt_model, X, y)
-print(comparator.leaderboard())
+# Comparar modelos
+comparador = ModelComparator(task="classification", cv=5)
+comparador.add_model("RF", modelo_rf, X, y)
+comparador.add_model("GBT", modelo_gbt, X, y)
+print(comparador.leaderboard())
 ```
 
-## Requirements
+## Dependencias
 
 ```
 scikit-learn>=1.2.0

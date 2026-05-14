@@ -1,35 +1,39 @@
-# 10 — Data Visualization Toolkit
+# 10 — Kit de Visualización de Datos
 
-Publication-ready charts and dashboards using matplotlib and seaborn. SOLID-compliant design with dedicated classes per visualization domain.
+Gráficos y dashboards de calidad profesional usando matplotlib y seaborn. Diseño SOLID con clases dedicadas por dominio de visualización.
 
-## Classes
+## Autor
 
-| Class | Charts |
+**Dody Dueñas**
+
+## Clases
+
+| Clase | Gráficos |
 |---|---|
-| `DistributionPlotter` | Histogram+KDE, Q-Q plot, violin/box, multi-distribution |
-| `CorrelationPlotter` | Heatmap, pair plot, scatter+regression |
-| `CategoricalPlotter` | Bar chart, donut chart, stacked bar |
-| `TimeSeriesPlotter` | Line + rolling average, seasonal box plots |
-| `ModelPerformancePlotter` | ROC curve, confusion matrix, residuals, feature importance |
-| `DashboardBuilder` | Auto EDA multi-panel dashboard |
+| `DistributionPlotter` | Histograma+KDE, Q-Q plot, violín/caja, distribuciones múltiples |
+| `CorrelationPlotter` | Mapa de calor, pair plot, dispersión+regresión |
+| `CategoricalPlotter` | Gráfico de barras, donut, barras apiladas |
+| `TimeSeriesPlotter` | Línea + promedio móvil, box plots estacionales |
+| `ModelPerformancePlotter` | Curva ROC, matriz de confusión, residuos, importancia de características |
+| `DashboardBuilder` | Dashboard EDA multipanel automático |
 
-## Usage
+## Uso
 
 ```python
 from data_visualization import DistributionPlotter, DashboardBuilder
 
-# Single plot
+# Gráfico individual
 dp = DistributionPlotter()
-fig = dp.histogram_kde(df["revenue"], title="Revenue Distribution")
-fig.savefig("revenue_dist.png", dpi=150)
+fig = dp.histogram_kde(df["ingresos"], title="Distribución de Ingresos")
+fig.savefig("dist_ingresos.png", dpi=150)
 
-# Full EDA dashboard
+# Dashboard EDA completo
 builder = DashboardBuilder()
-fig = builder.eda_dashboard(df, numeric_cols=["age", "income", "score"], cat_col="segment")
-fig.savefig("eda_dashboard.png", dpi=150)
+fig = builder.eda_dashboard(df, numeric_cols=["edad", "ingresos", "puntaje"], cat_col="segmento")
+fig.savefig("dashboard_eda.png", dpi=150)
 ```
 
-## Requirements
+## Dependencias
 
 ```
 matplotlib>=3.6.0

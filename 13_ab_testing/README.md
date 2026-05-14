@@ -1,45 +1,49 @@
-# 13 — A/B Testing & Experiment Analysis Toolkit
+# 13 — Kit de Pruebas A/B y Análisis de Experimentos
 
-Full statistical framework for designing, running, and reporting controlled experiments — both frequentist and Bayesian approaches.
+Framework estadístico completo para diseñar, ejecutar e informar experimentos controlados — enfoques frecuentista y bayesiano.
 
-## Classes
+## Autor
 
-| Class | Description |
+**Dody Dueñas**
+
+## Clases
+
+| Clase | Descripción |
 |---|---|
-| `SampleSizeCalculator` | Power analysis for proportions and means, MDE computation |
-| `FrequentistABTester` | Z-test, Welch's t-test, Mann-Whitney U, chi-square |
-| `BayesianABTester` | Beta-Binomial conjugate model, P(treatment > control), expected lift |
-| `ExperimentReporter` | Markdown A/B test report generation |
+| `SampleSizeCalculator` | Análisis de potencia para proporciones y medias, cálculo del efecto mínimo detectable (EMD) |
+| `FrequentistABTester` | Prueba Z, t de Welch, Mann-Whitney U, chi-cuadrado |
+| `BayesianABTester` | Modelo Beta-Binomial conjugado, P(tratamiento > control), incremento esperado |
+| `ExperimentReporter` | Generación de informes de experimentos A/B en Markdown |
 
-## Workflow
+## Flujo de Trabajo
 
 ```python
 from ab_testing import SampleSizeCalculator, FrequentistABTester, BayesianABTester, ExperimentReporter
 
-# 1. Plan sample size
+# 1. Planificar el tamaño de muestra
 calc = SampleSizeCalculator()
 plan = calc.for_proportions(baseline_rate=0.05, min_detectable_effect=0.20)
-print(f"Need {plan['n_per_group']:,} users per group")
+print(f"Se necesitan {plan['n_per_group']:,} usuarios por grupo")
 
-# 2. Run frequentist test
+# 2. Ejecutar prueba frecuentista
 tester = FrequentistABTester()
-result = tester.proportion_test(
+resultado = tester.proportion_test(
     control_conversions=500, control_n=10000,
     treatment_conversions=580, treatment_n=10000,
 )
-print(result["recommendation"])
+print(resultado["recomendacion"])
 
-# 3. Bayesian analysis
+# 3. Análisis bayesiano
 bay = BayesianABTester()
-bay_result = bay.analyze(500, 10000, 580, 10000)
-print(f"P(treatment wins): {bay_result['prob_treatment_wins']:.1%}")
+resultado_bay = bay.analyze(500, 10000, 580, 10000)
+print(f"P(tratamiento gana): {resultado_bay['prob_tratamiento_gana']:.1%}")
 
-# 4. Generate report
+# 4. Generar informe
 reporter = ExperimentReporter()
-md = reporter.generate("Homepage CTA Test", result, bay_result, plan)
+md = reporter.generate("Prueba Color Botón CTA", resultado, resultado_bay, plan)
 ```
 
-## Requirements
+## Dependencias
 
 ```
 scipy>=1.10.0

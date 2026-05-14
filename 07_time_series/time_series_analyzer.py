@@ -1,10 +1,11 @@
 """
-Time Series Analyzer
-====================
-Comprehensive toolkit for time series analysis, decomposition,
-stationarity testing, forecasting models, and anomaly detection.
+Analizador de Series de Tiempo
+================================
+Kit de herramientas completo para análisis de series de tiempo:
+descomposición, pruebas de estacionariedad, modelos de pronóstico
+y detección de anomalías.
 
-Author: Data Science Analytics Toolkit
+Autor: Dody Dueñas
 """
 
 import numpy as np
@@ -19,486 +20,481 @@ try:
     from statsmodels.tsa.arima.model import ARIMA
     from statsmodels.tsa.holtwinters import ExponentialSmoothing
     from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-    STATSMODELS_AVAILABLE = True
+    STATSMODELS_DISPONIBLE = True
 except ImportError:
-    STATSMODELS_AVAILABLE = False
+    STATSMODELS_DISPONIBLE = False
 
 
-class StationarityTester:
-    """Tests for stationarity using ADF, KPSS, and rolling statistics."""
+class PruebaEstacionariedad:
+    """Pruebas de estacionariedad usando ADF, KPSS y estadísticas de ventana móvil."""
 
-    def adf_test(self, series: pd.Series, alpha: float = 0.05) -> Dict[str, Any]:
+    def prueba_adf(self, serie: pd.Series, alpha: float = 0.05) -> Dict[str, Any]:
         """
-        Augmented Dickey-Fuller test for unit root.
+        Prueba Dickey-Fuller Aumentada (ADF) para raíz unitaria.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series to test.
+        serie : pd.Series
+            Serie de tiempo a evaluar.
         alpha : float
-            Significance level (default 0.05).
+            Nivel de significancia (por defecto 0.05).
 
-        Returns
+        Retorna
         -------
         dict
-            Test statistic, p-value, critical values, and stationarity verdict.
+            Estadístico, p-valor, valores críticos y veredicto de estacionariedad.
         """
-        if not STATSMODELS_AVAILABLE:
-            raise ImportError("statsmodels is required for ADF test.")
-        result = adfuller(series.dropna(), autolag="AIC")
-        output = {
-            "test_statistic": result[0],
-            "p_value": result[1],
-            "n_lags": result[2],
-            "n_observations": result[3],
-            "critical_values": result[4],
-            "is_stationary": result[1] < alpha,
-            "interpretation": (
-                "Series is stationary (reject H0)" if result[1] < alpha
-                else "Series is non-stationary (fail to reject H0)"
+        if not STATSMODELS_DISPONIBLE:
+            raise ImportError("Se requiere statsmodels para la prueba ADF.")
+        resultado = adfuller(serie.dropna(), autolag="AIC")
+        salida = {
+            "estadistico": resultado[0],
+            "p_valor": resultado[1],
+            "n_rezagos": resultado[2],
+            "n_observaciones": resultado[3],
+            "valores_criticos": resultado[4],
+            "es_estacionaria": resultado[1] < alpha,
+            "interpretacion": (
+                "La serie es estacionaria (se rechaza H0)" if resultado[1] < alpha
+                else "La serie NO es estacionaria (no se rechaza H0)"
             ),
         }
-        return output
+        return salida
 
-    def kpss_test(self, series: pd.Series, alpha: float = 0.05) -> Dict[str, Any]:
+    def prueba_kpss(self, serie: pd.Series, alpha: float = 0.05) -> Dict[str, Any]:
         """
-        KPSS test for level or trend stationarity.
+        Prueba KPSS de estacionariedad de nivel o tendencia.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series to test.
+        serie : pd.Series
+            Serie de tiempo a evaluar.
         alpha : float
-            Significance level.
+            Nivel de significancia.
 
-        Returns
+        Retorna
         -------
         dict
-            Test statistic, p-value, critical values, and stationarity verdict.
+            Estadístico, p-valor, valores críticos y veredicto.
         """
-        if not STATSMODELS_AVAILABLE:
-            raise ImportError("statsmodels is required for KPSS test.")
-        stat, p_value, n_lags, critical_values = kpss(series.dropna(), regression="c", nlags="auto")
-        output = {
-            "test_statistic": stat,
-            "p_value": p_value,
-            "n_lags": n_lags,
-            "critical_values": critical_values,
-            "is_stationary": p_value > alpha,
-            "interpretation": (
-                "Series is stationary (fail to reject H0)" if p_value > alpha
-                else "Series is non-stationary (reject H0)"
+        if not STATSMODELS_DISPONIBLE:
+            raise ImportError("Se requiere statsmodels para la prueba KPSS.")
+        stat, p_valor, n_rezagos, valores_criticos = kpss(serie.dropna(), regression="c", nlags="auto")
+        salida = {
+            "estadistico": stat,
+            "p_valor": p_valor,
+            "n_rezagos": n_rezagos,
+            "valores_criticos": valores_criticos,
+            "es_estacionaria": p_valor > alpha,
+            "interpretacion": (
+                "La serie es estacionaria (no se rechaza H0)" if p_valor > alpha
+                else "La serie NO es estacionaria (se rechaza H0)"
             ),
         }
-        return output
+        return salida
 
-    def rolling_stats(
-        self, series: pd.Series, window: int = 12
+    def estadisticas_moviles(
+        self, serie: pd.Series, ventana: int = 12
     ) -> pd.DataFrame:
         """
-        Compute rolling mean and standard deviation to assess stationarity visually.
+        Calcula media y desviación estándar móviles para evaluación visual de estacionariedad.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series.
-        window : int
-            Rolling window size.
+        serie : pd.Series
+            Serie de tiempo.
+        ventana : int
+            Tamaño de la ventana móvil.
 
-        Returns
+        Retorna
         -------
         pd.DataFrame
-            DataFrame with original series, rolling mean, and rolling std.
+            DataFrame con la serie original, media móvil y desv. estándar móvil.
         """
-        df = pd.DataFrame({"original": series})
-        df["rolling_mean"] = series.rolling(window=window).mean()
-        df["rolling_std"] = series.rolling(window=window).std()
+        df = pd.DataFrame({"original": serie})
+        df["media_movil"] = serie.rolling(window=ventana).mean()
+        df["std_movil"] = serie.rolling(window=ventana).std()
         return df
 
-    def full_report(self, series: pd.Series, alpha: float = 0.05) -> Dict[str, Any]:
-        """Run both ADF and KPSS and summarize stationarity."""
-        adf = self.adf_test(series, alpha)
-        kpss_result = self.kpss_test(series, alpha)
-        both_agree_stationary = adf["is_stationary"] and kpss_result["is_stationary"]
+    def informe_completo(self, serie: pd.Series, alpha: float = 0.05) -> Dict[str, Any]:
+        """Ejecuta ADF y KPSS y resume la estacionariedad."""
+        adf = self.prueba_adf(serie, alpha)
+        kpss_res = self.prueba_kpss(serie, alpha)
+        ambas_estacionarias = adf["es_estacionaria"] and kpss_res["es_estacionaria"]
         return {
             "adf": adf,
-            "kpss": kpss_result,
-            "both_agree_stationary": both_agree_stationary,
+            "kpss": kpss_res,
+            "ambas_confirman_estacionariedad": ambas_estacionarias,
             "summary": (
-                "Both tests confirm stationarity." if both_agree_stationary
-                else "Tests disagree or series is non-stationary — consider differencing."
+                "Ambas pruebas confirman estacionariedad." if ambas_estacionarias
+                else "Las pruebas no coinciden o la serie no es estacionaria — considere aplicar diferenciación."
             ),
         }
 
 
-class TimeSeriesDecomposer:
-    """Decompose time series into trend, seasonality, and residual components."""
+class DescompositorSeries:
+    """Descompone la serie de tiempo en componentes de tendencia, estacionalidad y residuo."""
 
-    def classical_decompose(
+    def descomposicion_clasica(
         self,
-        series: pd.Series,
-        period: int,
-        model: str = "additive",
+        serie: pd.Series,
+        periodo: int,
+        modelo: str = "additive",
     ) -> Any:
         """
-        Classical seasonal decomposition (moving average).
+        Descomposición estacional clásica (media móvil).
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series with DatetimeIndex.
-        period : int
-            Period of the seasonality (e.g., 12 for monthly, 7 for weekly).
-        model : str
-            'additive' or 'multiplicative'.
+        serie : pd.Series
+            Serie de tiempo con índice DatetimeIndex.
+        periodo : int
+            Período de la estacionalidad (ej: 12 para mensual, 7 para semanal).
+        modelo : str
+            'additive' o 'multiplicative'.
 
-        Returns
+        Retorna
         -------
         DecomposeResult
-            Statsmodels decomposition result with trend, seasonal, resid.
+            Resultado de descomposición con tendencia, estacionalidad y residuo.
         """
-        if not STATSMODELS_AVAILABLE:
-            raise ImportError("statsmodels is required.")
-        return seasonal_decompose(series, period=period, model=model, extrapolate_trend="freq")
+        if not STATSMODELS_DISPONIBLE:
+            raise ImportError("Se requiere statsmodels.")
+        return seasonal_decompose(serie, period=periodo, model=modelo, extrapolate_trend="freq")
 
-    def stl_decompose(
+    def descomposicion_stl(
         self,
-        series: pd.Series,
-        period: int,
-        robust: bool = True,
+        serie: pd.Series,
+        periodo: int,
+        robusto: bool = True,
     ) -> Any:
         """
-        STL (Seasonal-Trend decomposition using LOESS) — more robust than classical.
+        Descomposición STL (Seasonal-Trend using LOESS) — más robusta que la clásica.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series.
-        period : int
-            Seasonality period.
-        robust : bool
-            Use robust fitting to handle outliers.
-
-        Returns
-        -------
-        STLForecast result object.
+        serie : pd.Series
+            Serie de tiempo.
+        periodo : int
+            Período de estacionalidad.
+        robusto : bool
+            Usar ajuste robusto para manejar valores atípicos.
         """
-        if not STATSMODELS_AVAILABLE:
-            raise ImportError("statsmodels is required.")
-        stl = STL(series, period=period, robust=robust)
+        if not STATSMODELS_DISPONIBLE:
+            raise ImportError("Se requiere statsmodels.")
+        stl = STL(serie, period=periodo, robust=robusto)
         return stl.fit()
 
-    def extract_components(self, decomposition: Any) -> pd.DataFrame:
-        """Extract trend, seasonal, and residual into a tidy DataFrame."""
+    def extraer_componentes(self, descomposicion: Any) -> pd.DataFrame:
+        """Extrae tendencia, estacionalidad y residuo en un DataFrame ordenado."""
         return pd.DataFrame(
             {
-                "trend": decomposition.trend,
-                "seasonal": decomposition.seasonal,
-                "residual": decomposition.resid,
+                "tendencia": descomposicion.trend,
+                "estacionalidad": descomposicion.seasonal,
+                "residuo": descomposicion.resid,
             }
         )
 
 
-class ARIMAForecaster:
-    """Fit and forecast using ARIMA and auto-order selection."""
+class PronosticadorARIMA:
+    """Ajusta y pronostica usando ARIMA."""
 
     def __init__(self):
-        self.model = None
-        self.fitted = None
-        self.order = None
+        self.modelo = None
+        self.ajustado = None
+        self.orden = None
 
-    def fit(
+    def ajustar(
         self,
-        series: pd.Series,
-        order: Tuple[int, int, int] = (1, 1, 1),
-    ) -> "ARIMAForecaster":
+        serie: pd.Series,
+        orden: Tuple[int, int, int] = (1, 1, 1),
+    ) -> "PronosticadorARIMA":
         """
-        Fit an ARIMA model.
+        Ajusta un modelo ARIMA a la serie de tiempo.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Univariate time series.
-        order : tuple
-            (p, d, q) order for ARIMA.
+        serie : pd.Series
+            Serie de tiempo univariada.
+        orden : tuple
+            Orden (p, d, q) para ARIMA.
 
-        Returns
+        Retorna
         -------
         self
         """
-        if not STATSMODELS_AVAILABLE:
-            raise ImportError("statsmodels is required.")
-        self.order = order
-        self.model = ARIMA(series, order=order)
-        self.fitted = self.model.fit()
+        if not STATSMODELS_DISPONIBLE:
+            raise ImportError("Se requiere statsmodels.")
+        self.orden = orden
+        self.modelo = ARIMA(serie, order=orden)
+        self.ajustado = self.modelo.fit()
         return self
 
-    def forecast(self, steps: int = 12) -> pd.Series:
+    def pronosticar(self, pasos: int = 12) -> pd.Series:
         """
-        Generate future forecasts.
+        Genera pronósticos futuros.
 
-        Parameters
+        Parámetros
         ----------
-        steps : int
-            Number of periods to forecast.
+        pasos : int
+            Número de períodos a pronosticar.
 
-        Returns
+        Retorna
         -------
         pd.Series
-            Forecasted values.
+            Valores pronosticados.
         """
-        if self.fitted is None:
-            raise ValueError("Model not fitted. Call fit() first.")
-        forecast = self.fitted.forecast(steps=steps)
-        return forecast
+        if self.ajustado is None:
+            raise ValueError("Modelo no ajustado. Llame a ajustar() primero.")
+        return self.ajustado.forecast(steps=pasos)
 
-    def summary(self) -> str:
-        """Return model summary as string."""
-        if self.fitted is None:
-            raise ValueError("Model not fitted. Call fit() first.")
-        return str(self.fitted.summary())
+    def resumen(self) -> str:
+        """Retorna el resumen del modelo como texto."""
+        if self.ajustado is None:
+            raise ValueError("Modelo no ajustado. Llame a ajustar() primero.")
+        return str(self.ajustado.summary())
 
-    def residual_diagnostics(self) -> Dict[str, float]:
-        """Basic diagnostics on model residuals."""
-        if self.fitted is None:
-            raise ValueError("Model not fitted.")
-        resid = self.fitted.resid
+    def diagnostico_residuos(self) -> Dict[str, float]:
+        """Diagnóstico básico sobre los residuos del modelo."""
+        if self.ajustado is None:
+            raise ValueError("Modelo no ajustado.")
+        resid = self.ajustado.resid
         return {
-            "mean_residual": float(resid.mean()),
-            "std_residual": float(resid.std()),
-            "ljung_box_p": float(self.fitted.test_serial_correlation("ljungbox", lags=10)[0, 1]),
+            "media_residuo": float(resid.mean()),
+            "std_residuo": float(resid.std()),
+            "p_ljung_box": float(self.ajustado.test_serial_correlation("ljungbox", lags=10)[0, 1]),
         }
 
 
-class ExponentialSmoothingForecaster:
-    """Holt-Winters Exponential Smoothing for trend + seasonality."""
+class PronosticadorSuavizadoExponencial:
+    """Suavizado exponencial de Holt-Winters para tendencia + estacionalidad."""
 
     def __init__(self):
-        self.fitted = None
+        self.ajustado = None
 
-    def fit(
+    def ajustar(
         self,
-        series: pd.Series,
-        trend: Optional[str] = "add",
-        seasonal: Optional[str] = "add",
-        seasonal_periods: int = 12,
-        damped_trend: bool = False,
-    ) -> "ExponentialSmoothingForecaster":
+        serie: pd.Series,
+        tendencia: Optional[str] = "add",
+        estacionalidad: Optional[str] = "add",
+        periodos_estacionales: int = 12,
+        tendencia_amortiguada: bool = False,
+    ) -> "PronosticadorSuavizadoExponencial":
         """
-        Fit Holt-Winters model.
+        Ajusta el modelo Holt-Winters.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series data.
-        trend : str or None
-            'add', 'mul', or None.
-        seasonal : str or None
-            'add', 'mul', or None.
-        seasonal_periods : int
-            Length of the seasonal cycle.
-        damped_trend : bool
-            Whether to damp the trend.
+        serie : pd.Series
+            Datos de la serie de tiempo.
+        tendencia : str o None
+            'add', 'mul' o None.
+        estacionalidad : str o None
+            'add', 'mul' o None.
+        periodos_estacionales : int
+            Longitud del ciclo estacional.
+        tendencia_amortiguada : bool
+            Si se debe amortigurar la tendencia.
 
-        Returns
+        Retorna
         -------
         self
         """
-        if not STATSMODELS_AVAILABLE:
-            raise ImportError("statsmodels is required.")
-        model = ExponentialSmoothing(
-            series,
-            trend=trend,
-            seasonal=seasonal,
-            seasonal_periods=seasonal_periods,
-            damped_trend=damped_trend,
+        if not STATSMODELS_DISPONIBLE:
+            raise ImportError("Se requiere statsmodels.")
+        modelo = ExponentialSmoothing(
+            serie,
+            trend=tendencia,
+            seasonal=estacionalidad,
+            seasonal_periods=periodos_estacionales,
+            damped_trend=tendencia_amortiguada,
         )
-        self.fitted = model.fit(optimized=True)
+        self.ajustado = modelo.fit(optimized=True)
         return self
 
-    def forecast(self, steps: int = 12) -> pd.Series:
-        """Forecast future values."""
-        if self.fitted is None:
-            raise ValueError("Model not fitted. Call fit() first.")
-        return self.fitted.forecast(steps)
+    def pronosticar(self, pasos: int = 12) -> pd.Series:
+        """Genera pronósticos futuros."""
+        if self.ajustado is None:
+            raise ValueError("Modelo no ajustado. Llame a ajustar() primero.")
+        return self.ajustado.forecast(pasos)
 
-    def smoothing_params(self) -> Dict[str, float]:
-        """Return fitted smoothing parameters."""
+    def parametros_suavizado(self) -> Dict[str, float]:
+        """Retorna los parámetros de suavizado ajustados."""
         return {
-            "alpha": self.fitted.params.get("smoothing_level"),
-            "beta": self.fitted.params.get("smoothing_trend"),
-            "gamma": self.fitted.params.get("smoothing_seasonal"),
-            "phi": self.fitted.params.get("damping_trend"),
+            "alpha": self.ajustado.params.get("smoothing_level"),
+            "beta": self.ajustado.params.get("smoothing_trend"),
+            "gamma": self.ajustado.params.get("smoothing_seasonal"),
+            "phi": self.ajustado.params.get("damping_trend"),
         }
 
 
-class TimeSeriesAnomalyDetector:
-    """Detect anomalies in time series using statistical methods."""
+class DetectorAnomaliasSeries:
+    """Detecta anomalías en series de tiempo usando métodos estadísticos."""
 
-    def z_score_anomalies(
-        self, series: pd.Series, threshold: float = 3.0
+    def anomalias_zscore(
+        self, serie: pd.Series, umbral: float = 3.0
     ) -> pd.Series:
         """
-        Flag anomalies where |z-score| > threshold.
+        Marca anomalías donde |z-score| > umbral.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series.
-        threshold : float
-            Z-score cutoff.
+        serie : pd.Series
+            Serie de tiempo.
+        umbral : float
+            Valor de corte del z-score.
 
-        Returns
+        Retorna
         -------
         pd.Series
-            Boolean mask of anomaly positions.
+            Máscara booleana de posiciones anómalas.
         """
-        z_scores = (series - series.mean()) / series.std()
-        return z_scores.abs() > threshold
+        z_scores = (serie - serie.mean()) / serie.std()
+        return z_scores.abs() > umbral
 
-    def iqr_anomalies(self, series: pd.Series, factor: float = 1.5) -> pd.Series:
+    def anomalias_iqr(self, serie: pd.Series, factor: float = 1.5) -> pd.Series:
         """
-        Flag anomalies outside Q1 - factor*IQR or Q3 + factor*IQR.
+        Marca anomalías fuera de Q1 - factor*IQR o Q3 + factor*IQR.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series.
+        serie : pd.Series
+            Serie de tiempo.
         factor : float
-            IQR multiplier (1.5 = standard, 3.0 = extreme outliers only).
+            Multiplicador del IQR (1.5 = estándar, 3.0 = solo extremos).
 
-        Returns
+        Retorna
         -------
         pd.Series
-            Boolean mask of anomaly positions.
+            Máscara booleana de posiciones anómalas.
         """
-        q1 = series.quantile(0.25)
-        q3 = series.quantile(0.75)
+        q1 = serie.quantile(0.25)
+        q3 = serie.quantile(0.75)
         iqr = q3 - q1
-        lower = q1 - factor * iqr
-        upper = q3 + factor * iqr
-        return (series < lower) | (series > upper)
+        inferior = q1 - factor * iqr
+        superior = q3 + factor * iqr
+        return (serie < inferior) | (serie > superior)
 
-    def rolling_anomalies(
-        self, series: pd.Series, window: int = 30, sigma: float = 2.5
+    def anomalias_moviles(
+        self, serie: pd.Series, ventana: int = 30, sigma: float = 2.5
     ) -> pd.Series:
         """
-        Detect anomalies relative to a rolling mean ± sigma * rolling_std.
+        Detecta anomalías respecto a media móvil ± sigma * desv. estándar móvil.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series.
-        window : int
-            Rolling window size.
+        serie : pd.Series
+            Serie de tiempo.
+        ventana : int
+            Tamaño de la ventana móvil.
         sigma : float
-            Number of standard deviations for the band.
+            Número de desviaciones estándar para la banda.
 
-        Returns
+        Retorna
         -------
         pd.Series
-            Boolean mask where True = anomaly.
+            Máscara booleana donde True = anomalía.
         """
-        rolling_mean = series.rolling(window=window, center=True).mean()
-        rolling_std = series.rolling(window=window, center=True).std()
-        upper_band = rolling_mean + sigma * rolling_std
-        lower_band = rolling_mean - sigma * rolling_std
-        return (series > upper_band) | (series < lower_band)
+        media_movil = serie.rolling(window=ventana, center=True).mean()
+        std_movil = serie.rolling(window=ventana, center=True).std()
+        banda_superior = media_movil + sigma * std_movil
+        banda_inferior = media_movil - sigma * std_movil
+        return (serie > banda_superior) | (serie < banda_inferior)
 
-    def get_anomaly_summary(
-        self, series: pd.Series, method: str = "zscore"
+    def resumen_anomalias(
+        self, serie: pd.Series, metodo: str = "zscore"
     ) -> pd.DataFrame:
         """
-        Return a DataFrame of anomalous timestamps and values.
+        Retorna un DataFrame con las marcas de tiempo y valores anómalos.
 
-        Parameters
+        Parámetros
         ----------
-        series : pd.Series
-            Time series.
-        method : str
-            'zscore', 'iqr', or 'rolling'.
+        serie : pd.Series
+            Serie de tiempo.
+        metodo : str
+            'zscore', 'iqr' o 'movil'.
 
-        Returns
+        Retorna
         -------
         pd.DataFrame
         """
-        if method == "zscore":
-            mask = self.z_score_anomalies(series)
-        elif method == "iqr":
-            mask = self.iqr_anomalies(series)
-        elif method == "rolling":
-            mask = self.rolling_anomalies(series)
+        if metodo == "zscore":
+            mascara = self.anomalias_zscore(serie)
+        elif metodo == "iqr":
+            mascara = self.anomalias_iqr(serie)
+        elif metodo == "movil":
+            mascara = self.anomalias_moviles(serie)
         else:
-            raise ValueError(f"Unknown method '{method}'. Use 'zscore', 'iqr', or 'rolling'.")
-        anomalies = series[mask]
-        return pd.DataFrame({"timestamp": anomalies.index, "value": anomalies.values})
+            raise ValueError(f"Método desconocido '{metodo}'. Use 'zscore', 'iqr' o 'movil'.")
+        anomalias = serie[mascara]
+        return pd.DataFrame({"timestamp": anomalias.index, "valor": anomalias.values})
 
 
-class TimeSeriesPipeline:
+class PipelineSeries:
     """
-    End-to-end time series pipeline:
-      1. Stationarity testing
-      2. Decomposition
-      3. ARIMA forecasting
-      4. Anomaly detection
+    Pipeline completo de series de tiempo:
+      1. Prueba de estacionariedad
+      2. Descomposición
+      3. Pronóstico ARIMA
+      4. Detección de anomalías
     """
 
-    def __init__(self, series: pd.Series, period: int = 12):
-        self.series = series
-        self.period = period
-        self.tester = StationarityTester()
-        self.decomposer = TimeSeriesDecomposer()
-        self.forecaster = ARIMAForecaster()
-        self.anomaly_detector = TimeSeriesAnomalyDetector()
+    def __init__(self, serie: pd.Series, periodo: int = 12):
+        self.serie = serie
+        self.periodo = periodo
+        self.prueba = PruebaEstacionariedad()
+        self.descompositor = DescompositorSeries()
+        self.pronosticador = PronosticadorARIMA()
+        self.detector = DetectorAnomaliasSeries()
 
-    def run(self, forecast_steps: int = 12, arima_order: Tuple = (1, 1, 1)) -> Dict[str, Any]:
+    def ejecutar(self, pasos_pronostico: int = 12, orden_arima: Tuple = (1, 1, 1)) -> Dict[str, Any]:
         """
-        Execute the full pipeline.
+        Ejecuta el pipeline completo.
 
-        Returns
+        Retorna
         -------
         dict
-            Results from each stage.
+            Resultados de cada etapa.
         """
-        results = {}
+        resultados = {}
 
-        # 1. Stationarity
-        results["stationarity"] = self.tester.full_report(self.series)
+        # 1. Estacionariedad
+        resultados["estacionariedad"] = self.prueba.informe_completo(self.serie)
 
-        # 2. Decomposition
-        decomp = self.decomposer.classical_decompose(self.series, period=self.period)
-        results["decomposition"] = self.decomposer.extract_components(decomp)
+        # 2. Descomposición
+        descomp = self.descompositor.descomposicion_clasica(self.serie, periodo=self.periodo)
+        resultados["descomposicion"] = self.descompositor.extraer_componentes(descomp)
 
-        # 3. ARIMA Forecast
-        self.forecaster.fit(self.series, order=arima_order)
-        results["forecast"] = self.forecaster.forecast(steps=forecast_steps)
+        # 3. Pronóstico ARIMA
+        self.pronosticador.ajustar(self.serie, orden=orden_arima)
+        resultados["pronostico"] = self.pronosticador.pronosticar(pasos=pasos_pronostico)
 
-        # 4. Anomaly Detection
-        results["anomalies"] = self.anomaly_detector.get_anomaly_summary(self.series)
+        # 4. Detección de anomalías
+        resultados["anomalias"] = self.detector.resumen_anomalias(self.serie)
 
-        return results
+        return resultados
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Quick demo
+# Demostración rápida
 # ──────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    # Generate synthetic monthly time series
+    # Generar serie de tiempo mensual sintética
     np.random.seed(42)
-    dates = pd.date_range("2018-01-01", periods=120, freq="MS")
-    trend = np.linspace(100, 200, 120)
-    seasonality = 20 * np.sin(2 * np.pi * np.arange(120) / 12)
-    noise = np.random.normal(0, 5, 120)
-    series = pd.Series(trend + seasonality + noise, index=dates, name="sales")
+    fechas = pd.date_range("2018-01-01", periods=120, freq="MS")
+    tendencia = np.linspace(100, 200, 120)
+    estacionalidad = 20 * np.sin(2 * np.pi * np.arange(120) / 12)
+    ruido = np.random.normal(0, 5, 120)
+    serie = pd.Series(tendencia + estacionalidad + ruido, index=fechas, name="ventas")
 
-    pipeline = TimeSeriesPipeline(series, period=12)
-    results = pipeline.run(forecast_steps=12, arima_order=(1, 1, 1))
+    pipeline = PipelineSeries(serie, periodo=12)
+    resultados = pipeline.ejecutar(pasos_pronostico=12, orden_arima=(1, 1, 1))
 
-    print("=== Stationarity ===")
-    print(results["stationarity"]["summary"])
+    print("=== Estacionariedad ===")
+    print(resultados["estacionariedad"]["summary"])
 
-    print("\n=== ARIMA Forecast (next 12 months) ===")
-    print(results["forecast"].round(2).to_string())
+    print("\n=== Pronóstico ARIMA (próximos 12 meses) ===")
+    print(resultados["pronostico"].round(2).to_string())
 
-    print("\n=== Anomalies Detected ===")
-    print(results["anomalies"])
+    print("\n=== Anomalías Detectadas ===")
+    print(resultados["anomalias"])

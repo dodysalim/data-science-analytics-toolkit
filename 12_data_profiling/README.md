@@ -1,46 +1,50 @@
-# 12 — Data Profiling & Quality Report Generator
+# 12 — Generador de Perfiles de Datos y Reporte de Calidad
 
-Automated dataset profiling with comprehensive per-column statistics, missing value analysis, duplicate detection, and a 0-100 data quality score with letter grade.
+Perfilado automático de conjuntos de datos con estadísticas exhaustivas por columna, análisis de valores faltantes, detección de duplicados y puntuación de calidad de datos de 0 a 100 con calificación de letra.
 
-## Classes
+## Autor
 
-| Class | Description |
+**Dody Dueñas**
+
+## Clases
+
+| Clase | Descripción |
 |---|---|
-| `NumericProfiler` | Mean, median, std, IQR, skewness, kurtosis, outlier count, distribution shape |
-| `CategoricalProfiler` | Cardinality, top values, entropy, binary/identifier detection |
-| `DatetimeProfiler` | Date range, temporal patterns, time component detection |
-| `DatasetProfiler` | Full orchestration: overview, column profiles, missing analysis, quality score |
+| `NumericProfiler` | Media, mediana, desv. estándar, IQR, asimetría, curtosis, conteo de valores atípicos, forma de distribución |
+| `CategoricalProfiler` | Cardinalidad, valores principales, entropía, detección de binarios e identificadores |
+| `DatetimeProfiler` | Rango de fechas, patrones temporales, detección de componente de hora |
+| `DatasetProfiler` | Orquestación completa: resumen, perfiles por columna, análisis de nulos, puntuación de calidad |
 
-## Quality Score
+## Puntuación de Calidad
 
-The overall quality score (0–100) and letter grade (A/B/C/D) is computed from 4 dimensions:
+La puntuación global de calidad (0–100) y calificación de letra (A/B/C/D) se calcula en 4 dimensiones:
 
-| Dimension | Description |
+| Dimensión | Descripción |
 |---|---|
-| Completeness | Penalizes missing values |
-| Uniqueness | Penalizes duplicate rows |
-| Consistency | Penalizes constant/useless columns |
-| Validity | Flags potential identifier columns stored as categoricals |
+| Completitud | Penaliza los valores faltantes |
+| Unicidad | Penaliza las filas duplicadas |
+| Consistencia | Penaliza las columnas constantes/inútiles |
+| Validez | Marca columnas potencialmente identificadoras almacenadas como categóricas |
 
-## Usage
+## Uso
 
 ```python
 from data_profiling import DatasetProfiler
 
-profiler = DatasetProfiler()
-report = profiler.profile(df)
+perfilador = DatasetProfiler()
+reporte = perfilador.profile(df)
 
-# Print formatted summary
-profiler.print_summary(report)
+# Imprimir resumen formateado
+perfilador.print_summary(reporte)
 
-# Get tidy table
-print(profiler.summary_table(report))
+# Obtener tabla ordenada
+print(perfilador.summary_table(reporte))
 
-# Export to JSON
-profiler.export_json(report, "profile_report.json")
+# Exportar a JSON
+perfilador.export_json(reporte, "reporte_perfil.json")
 ```
 
-## Requirements
+## Dependencias
 
 ```
 pandas>=1.5.0

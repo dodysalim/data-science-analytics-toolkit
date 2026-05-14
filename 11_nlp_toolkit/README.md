@@ -1,38 +1,42 @@
-# 11 — NLP Text Processing Toolkit
+# 11 — Kit de Procesamiento de Texto NLP
 
-End-to-end natural language processing pipeline: text cleaning, TF-IDF vectorization, topic modeling (LDA/LSA), sentiment scoring, and n-gram analysis.
+Pipeline completo de procesamiento de lenguaje natural: limpieza de texto, vectorización TF-IDF, modelado de temas (LDA/LSA), análisis de sentimientos y extracción de n-gramas.
 
-## Classes
+## Autor
 
-| Class | Description |
+**Dody Dueñas**
+
+## Clases
+
+| Clase | Descripción |
 |---|---|
-| `TextPreprocessor` | Lowercase, URL/HTML removal, stopwords, stemming, lemmatization |
-| `NGramExtractor` | Top-k n-gram frequency extraction |
-| `TFIDFAnalyzer` | TF-IDF vectorization, top terms, cosine similarity |
-| `TopicModeler` | LDA or LSA topic modeling with dominant topic assignment |
-| `LexiconSentimentScorer` | Lexicon-based sentiment analysis (no API required) |
-| `NLPPipeline` | Full orchestration pipeline |
+| `TextPreprocessor` | Minúsculas, eliminación de URLs/HTML, stopwords, stemming, lematización |
+| `NGramExtractor` | Extracción de n-gramas por frecuencia top-k |
+| `TFIDFAnalyzer` | Vectorización TF-IDF, términos principales, similitud coseno |
+| `TopicModeler` | Modelado de temas LDA o LSA con asignación de tema dominante |
+| `LexiconSentimentScorer` | Análisis de sentimientos basado en léxico (sin API requerida) |
+| `NLPPipeline` | Pipeline completo de orquestación |
 
-## Usage
+## Uso
 
 ```python
 from nlp_toolkit import NLPPipeline
 
-texts = df["review_text"].tolist()
+textos = df["texto_reseña"].tolist()
 
 pipeline = NLPPipeline(n_topics=5, max_features=3000, topic_method="lda")
-results = pipeline.run(texts)
+resultados = pipeline.run(textos)
 
-print(results["topics"])          # LDA topics
-print(results["sentiment"])       # Sentiment scores
-print(results["top_terms"])       # Global TF-IDF terms
+print(resultados["topics"])      # Temas LDA
+print(resultados["sentiment"])   # Puntuaciones de sentimiento
+print(resultados["top_terms"])   # Términos TF-IDF globales
 ```
 
-## Requirements
+## Dependencias
 
 ```
 scikit-learn>=1.2.0
 pandas>=1.5.0
 numpy>=1.23.0
-nltk>=3.8.0  # optional (for lemmatization/stemming)
+nltk>=3.8.0  # opcional (para lematización/stemming)
 ```

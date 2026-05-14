@@ -1,18 +1,18 @@
 """
-Data Visualization Toolkit
-============================
-Publication-ready charts and dashboards using matplotlib and seaborn.
-Follows SOLID principles with separate classes per visualization domain.
+Kit de Visualización de Datos
+================================
+Gráficos y dashboards de calidad profesional usando matplotlib y seaborn.
+Sigue principios SOLID con clases separadas por dominio de visualización.
 
-Modules:
-  - DistributionPlotter      : histograms, KDE, Q-Q plots, violin plots
-  - CorrelationPlotter       : heatmaps, pair plots, scatter matrices
-  - CategoricalPlotter       : bar charts, count plots, pie/donut charts
-  - TimeSeriesPlotter        : line plots, rolling averages, seasonality
-  - ModelPerformancePlotter  : ROC, PR curves, confusion matrix, residuals
-  - DashboardBuilder         : multi-panel figure composition
+Módulos:
+  - DistributionPlotter      : histogramas, KDE, Q-Q plots, violin plots
+  - CorrelationPlotter       : mapas de calor, pair plots, matrices de dispersión
+  - CategoricalPlotter       : gráficos de barras, conteo, gráficos de torta/donut
+  - TimeSeriesPlotter        : líneas, promedios móviles, estacionalidad
+  - ModelPerformancePlotter  : curvas ROC y PR, matriz de confusión, residuos
+  - DashboardBuilder         : composición de figuras multipanel
 
-Author: Data Science Analytics Toolkit
+Autor: Dody Dueñas
 """
 
 import numpy as np
@@ -25,125 +25,125 @@ from scipy import stats
 import warnings
 warnings.filterwarnings("ignore")
 
-# ── Default Style ──────────────────────────────────────────────────────────────
-PALETTE = "husl"
-STYLE = "whitegrid"
-CONTEXT = "paper"
+# ── Estilo por defecto ─────────────────────────────────────────────────────────
+PALETA = "husl"
+ESTILO = "whitegrid"
+CONTEXTO = "paper"
 DPI = 120
 
-sns.set_theme(style=STYLE, context=CONTEXT, palette=PALETTE)
+sns.set_theme(style=ESTILO, context=CONTEXTO, palette=PALETA)
 plt.rcParams.update({"figure.dpi": DPI, "axes.titlepad": 12})
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# DISTRIBUTION PLOTTER
+# GRAFICADOR DE DISTRIBUCIONES
 # ──────────────────────────────────────────────────────────────────────────────
 
 class DistributionPlotter:
-    """Plot univariate and bivariate distributions."""
+    """Grafica distribuciones univariadas y bivariadas."""
 
     def histogram_kde(
         self,
-        series: pd.Series,
+        serie: pd.Series,
         bins: int = 30,
-        title: Optional[str] = None,
+        titulo: Optional[str] = None,
         color: str = "#5B84C4",
         figsize: Tuple = (8, 4),
     ) -> plt.Figure:
-        """Histogram with overlaid KDE curve."""
+        """Histograma con curva KDE superpuesta."""
         fig, ax = plt.subplots(figsize=figsize)
-        sns.histplot(series.dropna(), bins=bins, kde=True, ax=ax, color=color)
-        ax.set_title(title or f"Distribution of {series.name or 'Series'}")
-        ax.set_xlabel(series.name or "Value")
-        ax.set_ylabel("Count")
+        sns.histplot(serie.dropna(), bins=bins, kde=True, ax=ax, color=color)
+        ax.set_title(titulo or f"Distribución de {serie.name or 'Serie'}")
+        ax.set_xlabel(serie.name or "Valor")
+        ax.set_ylabel("Conteo")
         fig.tight_layout()
         return fig
 
     def qqplot(
         self,
-        series: pd.Series,
-        title: Optional[str] = None,
+        serie: pd.Series,
+        titulo: Optional[str] = None,
         figsize: Tuple = (6, 5),
     ) -> plt.Figure:
-        """Q-Q plot to assess normality."""
+        """Gráfico Q-Q para evaluar normalidad."""
         fig, ax = plt.subplots(figsize=figsize)
-        qq = stats.probplot(series.dropna(), dist="norm")
-        theoretical_q = qq[0][0]
-        sample_q = qq[0][1]
-        ax.scatter(theoretical_q, sample_q, alpha=0.6, color="#E07B54", s=20)
-        fit = np.polyfit(theoretical_q, sample_q, 1)
-        ax.plot(theoretical_q, np.polyval(fit, theoretical_q), color="#333", lw=1.5, ls="--")
-        ax.set_title(title or f"Q-Q Plot: {series.name or 'Series'}")
-        ax.set_xlabel("Theoretical Quantiles")
-        ax.set_ylabel("Sample Quantiles")
+        qq = stats.probplot(serie.dropna(), dist="norm")
+        cuant_teoricos = qq[0][0]
+        cuant_muestra = qq[0][1]
+        ax.scatter(cuant_teoricos, cuant_muestra, alpha=0.6, color="#E07B54", s=20)
+        ajuste = np.polyfit(cuant_teoricos, cuant_muestra, 1)
+        ax.plot(cuant_teoricos, np.polyval(ajuste, cuant_teoricos), color="#333", lw=1.5, ls="--")
+        ax.set_title(titulo or f"Gráfico Q-Q: {serie.name or 'Serie'}")
+        ax.set_xlabel("Cuantiles Teóricos")
+        ax.set_ylabel("Cuantiles Muestrales")
         fig.tight_layout()
         return fig
 
     def violin_box(
         self,
         df: pd.DataFrame,
-        numeric_col: str,
-        group_col: Optional[str] = None,
+        col_numerica: str,
+        col_grupo: Optional[str] = None,
         figsize: Tuple = (10, 5),
     ) -> plt.Figure:
-        """Violin + box plot optionally grouped by category."""
+        """Gráfico violín + caja opcionalmente agrupado por categoría."""
         fig, ax = plt.subplots(figsize=figsize)
-        if group_col:
-            sns.violinplot(data=df, x=group_col, y=numeric_col, ax=ax, inner="box", palette=PALETTE)
+        if col_grupo:
+            sns.violinplot(data=df, x=col_grupo, y=col_numerica, ax=ax, inner="box", palette=PALETA)
         else:
-            sns.violinplot(data=df, y=numeric_col, ax=ax, inner="box", color="#5B84C4")
-        ax.set_title(f"Distribution of {numeric_col}" + (f" by {group_col}" if group_col else ""))
+            sns.violinplot(data=df, y=col_numerica, ax=ax, inner="box", color="#5B84C4")
+        ax.set_title(f"Distribución de {col_numerica}" + (f" por {col_grupo}" if col_grupo else ""))
         fig.tight_layout()
         return fig
 
-    def multi_distribution(
-        self, df: pd.DataFrame, columns: List[str], figsize: Tuple = (15, 4)
+    def multi_distribucion(
+        self, df: pd.DataFrame, columnas: List[str], figsize: Tuple = (15, 4)
     ) -> plt.Figure:
-        """Plot histograms for multiple numeric columns in a single row."""
-        n = len(columns)
-        fig, axes = plt.subplots(1, n, figsize=figsize)
-        axes = np.atleast_1d(axes)
-        for ax, col in zip(axes, columns):
+        """Grafica histogramas para múltiples columnas numéricas en una sola fila."""
+        n = len(columnas)
+        fig, ejes = plt.subplots(1, n, figsize=figsize)
+        ejes = np.atleast_1d(ejes)
+        for ax, col in zip(ejes, columnas):
             sns.histplot(df[col].dropna(), kde=True, ax=ax)
             ax.set_title(col)
             ax.set_xlabel("")
-        fig.suptitle("Variable Distributions", fontsize=13, fontweight="bold", y=1.02)
+        fig.suptitle("Distribuciones de Variables", fontsize=13, fontweight="bold", y=1.02)
         fig.tight_layout()
         return fig
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# CORRELATION PLOTTER
+# GRAFICADOR DE CORRELACIONES
 # ──────────────────────────────────────────────────────────────────────────────
 
 class CorrelationPlotter:
-    """Visualize pairwise relationships and correlations."""
+    """Visualiza relaciones y correlaciones entre pares de variables."""
 
     def heatmap(
         self,
         df: pd.DataFrame,
-        method: str = "pearson",
+        metodo: str = "pearson",
         figsize: Tuple = (10, 8),
-        annot: bool = True,
+        anotar: bool = True,
     ) -> plt.Figure:
         """
-        Correlation heatmap.
+        Mapa de calor de correlaciones.
 
-        Parameters
+        Parámetros
         ----------
         df : pd.DataFrame
-            Numeric DataFrame.
-        method : str
-            'pearson', 'spearman', or 'kendall'.
+            DataFrame numérico.
+        metodo : str
+            'pearson', 'spearman' o 'kendall'.
         """
-        corr = df.select_dtypes(include=np.number).corr(method=method)
-        mask = np.triu(np.ones_like(corr, dtype=bool))
+        corr = df.select_dtypes(include=np.number).corr(method=metodo)
+        mascara = np.triu(np.ones_like(corr, dtype=bool))
         fig, ax = plt.subplots(figsize=figsize)
         sns.heatmap(
-            corr, mask=mask, annot=annot, fmt=".2f", cmap="coolwarm",
+            corr, mask=mascara, annot=anotar, fmt=".2f", cmap="coolwarm",
             center=0, square=True, linewidths=0.5, ax=ax,
         )
-        ax.set_title(f"{method.capitalize()} Correlation Matrix", fontsize=13, fontweight="bold")
+        ax.set_title(f"Matriz de Correlación {metodo.capitalize()}", fontsize=13, fontweight="bold")
         fig.tight_layout()
         return fig
 
@@ -151,18 +151,18 @@ class CorrelationPlotter:
         self,
         df: pd.DataFrame,
         hue: Optional[str] = None,
-        columns: Optional[List[str]] = None,
-        diag_kind: str = "kde",
+        columnas: Optional[List[str]] = None,
+        tipo_diagonal: str = "kde",
     ) -> sns.PairGrid:
-        """Seaborn pair plot for multivariate analysis."""
-        plot_df = df[columns].copy() if columns else df.select_dtypes(include=np.number).copy()
-        if hue and hue not in plot_df.columns:
-            plot_df[hue] = df[hue]
-        g = sns.pairplot(plot_df, hue=hue, diag_kind=diag_kind, plot_kws={"alpha": 0.5})
+        """Pair plot de seaborn para análisis multivariado."""
+        df_plot = df[columnas].copy() if columnas else df.select_dtypes(include=np.number).copy()
+        if hue and hue not in df_plot.columns:
+            df_plot[hue] = df[hue]
+        g = sns.pairplot(df_plot, hue=hue, diag_kind=tipo_diagonal, plot_kws={"alpha": 0.5})
         g.figure.suptitle("Pair Plot", y=1.02, fontsize=13, fontweight="bold")
         return g
 
-    def scatter_with_regression(
+    def scatter_con_regresion(
         self,
         df: pd.DataFrame,
         x: str,
@@ -170,7 +170,7 @@ class CorrelationPlotter:
         hue: Optional[str] = None,
         figsize: Tuple = (7, 5),
     ) -> plt.Figure:
-        """Scatter plot with linear regression line."""
+        """Dispersión con línea de regresión lineal."""
         fig, ax = plt.subplots(figsize=figsize)
         sns.regplot(data=df, x=x, y=y, scatter_kws={"alpha": 0.4, "s": 20}, ax=ax)
         ax.set_title(f"{y} vs {x}")
@@ -179,77 +179,77 @@ class CorrelationPlotter:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# CATEGORICAL PLOTTER
+# GRAFICADOR CATEGÓRICO
 # ──────────────────────────────────────────────────────────────────────────────
 
 class CategoricalPlotter:
-    """Visualize categorical variables."""
+    """Visualiza variables categóricas."""
 
-    def bar_chart(
+    def grafico_barras(
         self,
         df: pd.DataFrame,
         x: str,
         y: Optional[str] = None,
         top_n: int = 15,
         figsize: Tuple = (10, 5),
-        title: Optional[str] = None,
+        titulo: Optional[str] = None,
     ) -> plt.Figure:
-        """Horizontal bar chart of counts or aggregated values."""
+        """Gráfico de barras horizontal de conteos o valores agregados."""
         if y is None:
-            counts = df[x].value_counts().head(top_n)
-            data = counts.reset_index()
-            data.columns = [x, "count"]
-            y_col = "count"
+            conteos = df[x].value_counts().head(top_n)
+            datos = conteos.reset_index()
+            datos.columns = [x, "conteo"]
+            col_y = "conteo"
         else:
-            data = df.groupby(x)[y].mean().nlargest(top_n).reset_index()
-            y_col = y
+            datos = df.groupby(x)[y].mean().nlargest(top_n).reset_index()
+            col_y = y
 
         fig, ax = plt.subplots(figsize=figsize)
-        sns.barplot(data=data, y=x, x=y_col, ax=ax, palette=PALETTE)
-        ax.set_title(title or f"Top {top_n} {x}")
-        ax.set_xlabel(y_col)
+        sns.barplot(data=datos, y=x, x=col_y, ax=ax, palette=PALETA)
+        ax.set_title(titulo or f"Top {top_n} {x}")
+        ax.set_xlabel(col_y)
         ax.set_ylabel(x)
         fig.tight_layout()
         return fig
 
-    def donut_chart(
+    def grafico_donut(
         self,
-        series: pd.Series,
+        serie: pd.Series,
         top_n: int = 8,
         figsize: Tuple = (7, 7),
-        title: Optional[str] = None,
+        titulo: Optional[str] = None,
     ) -> plt.Figure:
-        """Donut chart for categorical proportions."""
-        counts = series.value_counts().head(top_n)
+        """Gráfico donut para proporciones categóricas."""
+        conteos = serie.value_counts().head(top_n)
         fig, ax = plt.subplots(figsize=figsize)
-        wedge_props = {"width": 0.5, "edgecolor": "white", "linewidth": 2}
-        colors = sns.color_palette(PALETTE, len(counts))
+        props_cuña = {"width": 0.5, "edgecolor": "white", "linewidth": 2}
+        colores = sns.color_palette(PALETA, len(conteos))
         ax.pie(
-            counts.values,
-            labels=counts.index,
+            conteos.values,
+            labels=conteos.index,
             autopct="%1.1f%%",
             startangle=90,
-            colors=colors,
-            wedgeprops=wedge_props,
+            colors=colores,
+            wedgeprops=props_cuña,
         )
-        ax.set_title(title or f"{series.name or 'Category'} Distribution")
+        ax.set_title(titulo or f"Distribución de {serie.name or 'Categoría'}")
         fig.tight_layout()
         return fig
 
-    def stacked_bar(
+    def barras_apiladas(
         self,
         df: pd.DataFrame,
         x: str,
         hue: str,
         figsize: Tuple = (12, 5),
-        normalize: bool = True,
+        normalizar: bool = True,
     ) -> plt.Figure:
-        """Stacked bar chart showing category composition."""
-        ct = pd.crosstab(df[x], df[hue], normalize="index" if normalize else False)
+        """Gráfico de barras apiladas mostrando composición de categorías."""
+        ct = pd.crosstab(df[x], df[hue], normalize="index" if normalizar else False)
         fig, ax = plt.subplots(figsize=figsize)
         ct.plot(kind="bar", stacked=True, ax=ax, colormap="tab20", width=0.75)
-        ax.set_title(f"{hue} Composition by {x}")
-        ax.set_ylabel("Proportion" if normalize else "Count")
+        ax.set_title(f"Composición de {hue} por {x}")
+        ax.set_ylabel("Proporción" if normalizar else "Conteo")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
         ax.legend(loc="upper right", bbox_to_anchor=(1.15, 1), fontsize=8)
         fig.tight_layout()
@@ -257,228 +257,228 @@ class CategoricalPlotter:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# TIME SERIES PLOTTER
+# GRAFICADOR DE SERIES DE TIEMPO
 # ──────────────────────────────────────────────────────────────────────────────
 
 class TimeSeriesPlotter:
-    """Visualize time series data."""
+    """Visualiza datos de series de tiempo."""
 
-    def line_plot(
+    def grafico_linea(
         self,
-        series: pd.Series,
-        rolling_window: Optional[int] = None,
-        title: Optional[str] = None,
+        serie: pd.Series,
+        ventana_movil: Optional[int] = None,
+        titulo: Optional[str] = None,
         figsize: Tuple = (12, 4),
     ) -> plt.Figure:
-        """Line plot with optional rolling average overlay."""
+        """Gráfico de línea con promedio móvil opcional superpuesto."""
         fig, ax = plt.subplots(figsize=figsize)
-        ax.plot(series.index, series.values, alpha=0.5, color="#5B84C4", lw=1, label="Original")
-        if rolling_window:
-            rolling = series.rolling(window=rolling_window).mean()
-            ax.plot(rolling.index, rolling.values, color="#E07B54", lw=2,
-                    label=f"Rolling Mean ({rolling_window})")
+        ax.plot(serie.index, serie.values, alpha=0.5, color="#5B84C4", lw=1, label="Original")
+        if ventana_movil:
+            movil = serie.rolling(window=ventana_movil).mean()
+            ax.plot(movil.index, movil.values, color="#E07B54", lw=2,
+                    label=f"Media Móvil ({ventana_movil})")
             ax.legend()
-        ax.set_title(title or f"Time Series: {series.name or ''}")
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Value")
+        ax.set_title(titulo or f"Serie de Tiempo: {serie.name or ''}")
+        ax.set_xlabel("Fecha")
+        ax.set_ylabel("Valor")
         fig.tight_layout()
         return fig
 
-    def seasonal_plot(
+    def grafico_estacional(
         self,
-        series: pd.Series,
-        freq: str = "M",
+        serie: pd.Series,
+        frecuencia: str = "M",
         figsize: Tuple = (12, 5),
     ) -> plt.Figure:
-        """Box plot of values grouped by period (month, day of week, etc.)."""
-        df_tmp = pd.DataFrame({"value": series})
-        if freq == "M":
-            df_tmp["period"] = series.index.month
-            xlabel = "Month"
-        elif freq == "DOW":
-            df_tmp["period"] = series.index.dayofweek
-            xlabel = "Day of Week"
-        elif freq == "H":
-            df_tmp["period"] = series.index.hour
-            xlabel = "Hour"
+        """Box plot de valores agrupados por período (mes, día de la semana, etc.)."""
+        df_tmp = pd.DataFrame({"valor": serie})
+        if frecuencia == "M":
+            df_tmp["periodo"] = serie.index.month
+            etiqueta_x = "Mes"
+        elif frecuencia == "DOW":
+            df_tmp["periodo"] = serie.index.dayofweek
+            etiqueta_x = "Día de la Semana"
+        elif frecuencia == "H":
+            df_tmp["periodo"] = serie.index.hour
+            etiqueta_x = "Hora"
         else:
-            df_tmp["period"] = series.index.year
-            xlabel = "Year"
+            df_tmp["periodo"] = serie.index.year
+            etiqueta_x = "Año"
         fig, ax = plt.subplots(figsize=figsize)
-        sns.boxplot(data=df_tmp, x="period", y="value", ax=ax, palette=PALETTE)
-        ax.set_title(f"Seasonal Pattern by {xlabel}")
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(series.name or "Value")
+        sns.boxplot(data=df_tmp, x="periodo", y="valor", ax=ax, palette=PALETA)
+        ax.set_title(f"Patrón Estacional por {etiqueta_x}")
+        ax.set_xlabel(etiqueta_x)
+        ax.set_ylabel(serie.name or "Valor")
         fig.tight_layout()
         return fig
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MODEL PERFORMANCE PLOTTER
+# GRAFICADOR DE DESEMPEÑO DE MODELOS
 # ──────────────────────────────────────────────────────────────────────────────
 
 class ModelPerformancePlotter:
-    """Visualize ML model evaluation metrics."""
+    """Visualiza métricas de evaluación de modelos de ML."""
 
-    def roc_curve_plot(
+    def curva_roc(
         self,
         fpr: np.ndarray,
         tpr: np.ndarray,
         auc: float,
-        model_name: str = "Model",
+        nombre_modelo: str = "Modelo",
         figsize: Tuple = (6, 5),
     ) -> plt.Figure:
-        """Plot ROC curve."""
+        """Grafica la curva ROC."""
         fig, ax = plt.subplots(figsize=figsize)
-        ax.plot(fpr, tpr, lw=2, color="#5B84C4", label=f"{model_name} (AUC = {auc:.3f})")
-        ax.plot([0, 1], [0, 1], "k--", lw=1, label="Random Classifier")
+        ax.plot(fpr, tpr, lw=2, color="#5B84C4", label=f"{nombre_modelo} (AUC = {auc:.3f})")
+        ax.plot([0, 1], [0, 1], "k--", lw=1, label="Clasificador Aleatorio")
         ax.fill_between(fpr, tpr, alpha=0.1, color="#5B84C4")
-        ax.set_xlabel("False Positive Rate")
-        ax.set_ylabel("True Positive Rate")
-        ax.set_title("ROC Curve")
+        ax.set_xlabel("Tasa de Falsos Positivos")
+        ax.set_ylabel("Tasa de Verdaderos Positivos")
+        ax.set_title("Curva ROC")
         ax.legend(loc="lower right")
         fig.tight_layout()
         return fig
 
-    def confusion_matrix_plot(
+    def grafico_matriz_confusion(
         self,
         cm: pd.DataFrame,
-        normalize: bool = True,
+        normalizar: bool = True,
         figsize: Tuple = (6, 5),
     ) -> plt.Figure:
-        """Heatmap of confusion matrix."""
-        data = cm.div(cm.sum(axis=1), axis=0).round(2) if normalize else cm
+        """Mapa de calor de la matriz de confusión."""
+        datos = cm.div(cm.sum(axis=1), axis=0).round(2) if normalizar else cm
         fig, ax = plt.subplots(figsize=figsize)
         sns.heatmap(
-            data, annot=True, fmt=".2f" if normalize else "d",
+            datos, annot=True, fmt=".2f" if normalizar else "d",
             cmap="Blues", linewidths=0.5, ax=ax,
         )
-        ax.set_title("Confusion Matrix" + (" (Normalized)" if normalize else ""))
-        ax.set_ylabel("Actual")
-        ax.set_xlabel("Predicted")
+        ax.set_title("Matriz de Confusión" + (" (Normalizada)" if normalizar else ""))
+        ax.set_ylabel("Real")
+        ax.set_xlabel("Predicho")
         fig.tight_layout()
         return fig
 
-    def residuals_plot(
+    def grafico_residuos(
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
         figsize: Tuple = (12, 4),
     ) -> plt.Figure:
-        """Residual analysis: residuals vs fitted and residual distribution."""
-        residuals = y_true - y_pred
-        fig, axes = plt.subplots(1, 2, figsize=figsize)
-        axes[0].scatter(y_pred, residuals, alpha=0.4, color="#5B84C4", s=15)
-        axes[0].axhline(0, color="red", ls="--", lw=1)
-        axes[0].set_xlabel("Fitted Values")
-        axes[0].set_ylabel("Residuals")
-        axes[0].set_title("Residuals vs Fitted")
-        sns.histplot(residuals, kde=True, ax=axes[1], color="#E07B54")
-        axes[1].set_title("Residual Distribution")
-        axes[1].set_xlabel("Residual")
+        """Análisis de residuos: residuos vs ajustados y distribución de residuos."""
+        residuos = y_true - y_pred
+        fig, ejes = plt.subplots(1, 2, figsize=figsize)
+        ejes[0].scatter(y_pred, residuos, alpha=0.4, color="#5B84C4", s=15)
+        ejes[0].axhline(0, color="red", ls="--", lw=1)
+        ejes[0].set_xlabel("Valores Ajustados")
+        ejes[0].set_ylabel("Residuos")
+        ejes[0].set_title("Residuos vs Ajustados")
+        sns.histplot(residuos, kde=True, ax=ejes[1], color="#E07B54")
+        ejes[1].set_title("Distribución de Residuos")
+        ejes[1].set_xlabel("Residuo")
         fig.tight_layout()
         return fig
 
-    def feature_importance_plot(
+    def importancia_caracteristicas(
         self,
-        feature_names: List[str],
-        importances: np.ndarray,
+        nombres: List[str],
+        importancias: np.ndarray,
         top_n: int = 20,
         figsize: Tuple = (8, 6),
     ) -> plt.Figure:
-        """Horizontal bar chart of feature importances."""
+        """Gráfico de barras horizontal de importancia de características."""
         df = (
-            pd.DataFrame({"feature": feature_names, "importance": importances})
-            .sort_values("importance", ascending=True)
+            pd.DataFrame({"caracteristica": nombres, "importancia": importancias})
+            .sort_values("importancia", ascending=True)
             .tail(top_n)
         )
         fig, ax = plt.subplots(figsize=figsize)
-        ax.barh(df["feature"], df["importance"], color="#5B84C4")
-        ax.set_title(f"Top {top_n} Feature Importances")
-        ax.set_xlabel("Importance")
+        ax.barh(df["caracteristica"], df["importancia"], color="#5B84C4")
+        ax.set_title(f"Top {top_n} Características más Importantes")
+        ax.set_xlabel("Importancia")
         fig.tight_layout()
         return fig
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# DASHBOARD BUILDER
+# CONSTRUCTOR DE DASHBOARDS
 # ──────────────────────────────────────────────────────────────────────────────
 
 class DashboardBuilder:
-    """Compose multi-panel diagnostic dashboards."""
+    """Compone dashboards de diagnóstico multipanel."""
 
-    def eda_dashboard(
+    def dashboard_eda(
         self, df: pd.DataFrame, numeric_cols: List[str], cat_col: Optional[str] = None
     ) -> plt.Figure:
         """
-        Auto-generate a 2×3 EDA dashboard:
-        Row 1: distributions of first 3 numeric columns
-        Row 2: correlation heatmap + top category bar + combined box plots
+        Genera automáticamente un dashboard EDA 2×3:
+        Fila 1: distribuciones de las primeras 3 columnas numéricas
+        Fila 2: mapa de calor de correlación + barras de categoría + box plots combinados
         """
         fig = plt.figure(figsize=(16, 9))
         gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.35)
 
-        # Row 1: distributions
+        # Fila 1: distribuciones
         for i, col in enumerate(numeric_cols[:3]):
             ax = fig.add_subplot(gs[0, i])
             sns.histplot(df[col].dropna(), kde=True, ax=ax)
-            ax.set_title(f"Distribution: {col}", fontsize=9)
+            ax.set_title(f"Distribución: {col}", fontsize=9)
             ax.set_xlabel("")
 
-        # Row 2, col 0: correlation heatmap (mini)
+        # Fila 2, col 0: mapa de calor de correlación (mini)
         ax_corr = fig.add_subplot(gs[1, 0])
         corr = df[numeric_cols].corr()
         sns.heatmap(corr, annot=len(numeric_cols) <= 6, fmt=".1f", cmap="coolwarm",
                     center=0, ax=ax_corr, cbar=False, square=True, linewidths=0.3)
-        ax_corr.set_title("Correlation Matrix", fontsize=9)
+        ax_corr.set_title("Matriz de Correlación", fontsize=9)
 
-        # Row 2, col 1: categorical bar (if provided)
+        # Fila 2, col 1: barras categóricas (si se proporcionó)
         ax_cat = fig.add_subplot(gs[1, 1])
         if cat_col and cat_col in df.columns:
-            counts = df[cat_col].value_counts().head(10)
-            ax_cat.barh(counts.index, counts.values, color=sns.color_palette(PALETTE, len(counts)))
-            ax_cat.set_title(f"Top Values: {cat_col}", fontsize=9)
+            conteos = df[cat_col].value_counts().head(10)
+            ax_cat.barh(conteos.index, conteos.values, color=sns.color_palette(PALETA, len(conteos)))
+            ax_cat.set_title(f"Top Valores: {cat_col}", fontsize=9)
         else:
             ax_cat.axis("off")
 
-        # Row 2, col 2: box plots
+        # Fila 2, col 2: box plots normalizados
         ax_box = fig.add_subplot(gs[1, 2])
-        normed = (df[numeric_cols] - df[numeric_cols].mean()) / df[numeric_cols].std()
-        normed.boxplot(ax=ax_box)
-        ax_box.set_title("Normalized Box Plots", fontsize=9)
+        norm = (df[numeric_cols] - df[numeric_cols].mean()) / df[numeric_cols].std()
+        norm.boxplot(ax=ax_box)
+        ax_box.set_title("Box Plots Normalizados", fontsize=9)
         ax_box.set_xticklabels(numeric_cols, rotation=45, ha="right", fontsize=7)
 
-        fig.suptitle("EDA Dashboard", fontsize=14, fontweight="bold", y=1.01)
+        fig.suptitle("Dashboard EDA", fontsize=14, fontweight="bold", y=1.01)
         return fig
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Demo
+# Demostración
 # ──────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     np.random.seed(42)
     df = pd.DataFrame({
-        "age": np.random.normal(35, 10, 500),
-        "income": np.random.lognormal(10.5, 0.5, 500),
-        "score": np.random.beta(2, 5, 500) * 100,
-        "category": np.random.choice(["A", "B", "C", "D", "E"], 500),
+        "edad": np.random.normal(35, 10, 500),
+        "ingresos": np.random.lognormal(10.5, 0.5, 500),
+        "puntaje": np.random.beta(2, 5, 500) * 100,
+        "categoria": np.random.choice(["A", "B", "C", "D", "E"], 500),
     })
 
-    # Distribution
+    # Distribución
     dp = DistributionPlotter()
-    fig1 = dp.histogram_kde(df["age"], title="Age Distribution")
+    fig1 = dp.histogram_kde(df["edad"], titulo="Distribución de Edad")
 
-    # Correlation
+    # Correlación
     cp = CorrelationPlotter()
-    fig2 = cp.heatmap(df, method="pearson")
+    fig2 = cp.heatmap(df, metodo="pearson")
 
-    # Categorical
+    # Categórico
     catp = CategoricalPlotter()
-    fig3 = catp.bar_chart(df, x="category")
+    fig3 = catp.grafico_barras(df, x="categoria")
 
     # Dashboard
     builder = DashboardBuilder()
-    fig4 = builder.eda_dashboard(df, numeric_cols=["age", "income", "score"], cat_col="category")
+    fig4 = builder.dashboard_eda(df, numeric_cols=["edad", "ingresos", "puntaje"], cat_col="categoria")
 
     plt.show()
-    print("All plots generated successfully.")
+    print("Todos los gráficos generados exitosamente.")

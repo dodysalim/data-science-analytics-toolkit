@@ -1,17 +1,16 @@
 """
-A/B Testing & Experiment Analysis Toolkit
-==========================================
-Statistical framework for designing and analyzing controlled experiments:
-- Sample size calculation (power analysis)
-- Z-test and T-test for means
-- Chi-square test for proportions/conversion rates
-- Mann-Whitney U test (non-parametric)
-- Sequential testing (always-valid inference)
-- Bayesian A/B testing
-- Multi-variant (A/B/n) ANOVA analysis
-- Full experiment report generation
+Kit de Pruebas A/B y Análisis de Experimentos
+================================================
+Framework estadístico para diseñar y analizar experimentos controlados:
+- Cálculo del tamaño de muestra (análisis de potencia)
+- Prueba Z y T para medias
+- Prueba chi-cuadrado para proporciones/tasas de conversión
+- Prueba Mann-Whitney U (no paramétrica)
+- Pruebas A/B Bayesianas
+- Análisis ANOVA multivariante (A/B/n)
+- Generación de informes de experimentos
 
-Author: Data Science Analytics Toolkit
+Autor: Dody Dueñas
 """
 
 import numpy as np
@@ -24,14 +23,14 @@ warnings.filterwarnings("ignore")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# SAMPLE SIZE CALCULATOR
+# CALCULADOR DE TAMAÑO DE MUESTRA
 # ──────────────────────────────────────────────────────────────────────────────
 
 class SampleSizeCalculator:
     """
-    Calculate required sample size for A/B test power analysis.
+    Calcula el tamaño de muestra requerido para el análisis de potencia de pruebas A/B.
 
-    Based on two-sample proportions (conversion rates) or two-sample means.
+    Basado en dos proporciones (tasas de conversión) o dos medias independientes.
     """
 
     def for_proportions(
@@ -40,287 +39,286 @@ class SampleSizeCalculator:
         min_detectable_effect: float,
         alpha: float = 0.05,
         power: float = 0.80,
-        two_sided: bool = True,
+        dos_colas: bool = True,
     ) -> Dict[str, Any]:
         """
-        Calculate sample size for comparing two proportions.
+        Calcula el tamaño de muestra para comparar dos proporciones.
 
-        Parameters
+        Parámetros
         ----------
         baseline_rate : float
-            Control group conversion rate (e.g., 0.10 for 10%).
+            Tasa de conversión del grupo de control (ej: 0.10 para 10%).
         min_detectable_effect : float
-            Minimum relative lift to detect (e.g., 0.05 for +5%).
+            Incremento relativo mínimo a detectar (ej: 0.05 para +5%).
         alpha : float
-            Significance level (Type I error).
+            Nivel de significancia (Error Tipo I).
         power : float
-            Statistical power (1 - Type II error).
-        two_sided : bool
-            Two-sided or one-sided test.
+            Potencia estadística (1 - Error Tipo II).
+        dos_colas : bool
+            Prueba de dos colas o una cola.
 
-        Returns
+        Retorna
         -------
-        dict with: n_per_group, total_n, treatment_rate, effect_size
+        dict con: n_por_grupo, total_n, tasa_tratamiento, tamanio_efecto
         """
-        treatment_rate = baseline_rate * (1 + min_detectable_effect)
-        z_alpha = stats.norm.ppf(1 - alpha / (2 if two_sided else 1))
-        z_power = stats.norm.ppf(power)
+        tasa_tratamiento = baseline_rate * (1 + min_detectable_effect)
+        z_alpha = stats.norm.ppf(1 - alpha / (2 if dos_colas else 1))
+        z_potencia = stats.norm.ppf(power)
 
-        p_bar = (baseline_rate + treatment_rate) / 2
-        effect_size = abs(treatment_rate - baseline_rate)
+        p_barra = (baseline_rate + tasa_tratamiento) / 2
+        tamanio_efecto = abs(tasa_tratamiento - baseline_rate)
 
-        # Standard formula for two proportions
         n = (
-            (z_alpha * np.sqrt(2 * p_bar * (1 - p_bar)) +
-             z_power * np.sqrt(baseline_rate * (1 - baseline_rate) +
-                               treatment_rate * (1 - treatment_rate))) ** 2
-            / effect_size ** 2
+            (z_alpha * np.sqrt(2 * p_barra * (1 - p_barra)) +
+             z_potencia * np.sqrt(baseline_rate * (1 - baseline_rate) +
+                                  tasa_tratamiento * (1 - tasa_tratamiento))) ** 2
+            / tamanio_efecto ** 2
         )
         n = int(np.ceil(n))
 
         return {
-            "n_per_group": n,
+            "n_por_grupo": n,
             "total_n": n * 2,
-            "baseline_rate": baseline_rate,
-            "treatment_rate": round(treatment_rate, 6),
-            "min_detectable_effect": min_detectable_effect,
+            "tasa_baseline": baseline_rate,
+            "tasa_tratamiento": round(tasa_tratamiento, 6),
+            "efecto_minimo_detectable": min_detectable_effect,
             "alpha": alpha,
-            "power": power,
-            "effect_size": round(effect_size, 6),
+            "potencia": power,
+            "tamanio_efecto": round(tamanio_efecto, 6),
         }
 
     def for_means(
         self,
-        baseline_mean: float,
-        baseline_std: float,
-        min_detectable_delta: float,
+        media_baseline: float,
+        std_baseline: float,
+        delta_minimo: float,
         alpha: float = 0.05,
         power: float = 0.80,
-        two_sided: bool = True,
+        dos_colas: bool = True,
     ) -> Dict[str, Any]:
         """
-        Calculate sample size for comparing two means (independent t-test).
+        Calcula el tamaño de muestra para comparar dos medias (t-test independiente).
 
-        Parameters
+        Parámetros
         ----------
-        baseline_mean : float
-            Control group mean.
-        baseline_std : float
-            Pooled standard deviation estimate.
-        min_detectable_delta : float
-            Absolute minimum effect size to detect.
+        media_baseline : float
+            Media del grupo de control.
+        std_baseline : float
+            Estimación de la desviación estándar agrupada.
+        delta_minimo : float
+            Efecto mínimo absoluto a detectar.
         """
-        z_alpha = stats.norm.ppf(1 - alpha / (2 if two_sided else 1))
-        z_power = stats.norm.ppf(power)
-        n = int(np.ceil(2 * ((z_alpha + z_power) * baseline_std / min_detectable_delta) ** 2))
+        z_alpha = stats.norm.ppf(1 - alpha / (2 if dos_colas else 1))
+        z_potencia = stats.norm.ppf(power)
+        n = int(np.ceil(2 * ((z_alpha + z_potencia) * std_baseline / delta_minimo) ** 2))
         return {
-            "n_per_group": n,
+            "n_por_grupo": n,
             "total_n": n * 2,
-            "baseline_mean": baseline_mean,
-            "min_detectable_delta": min_detectable_delta,
-            "cohens_d": round(min_detectable_delta / baseline_std, 4),
+            "media_baseline": media_baseline,
+            "delta_minimo": delta_minimo,
+            "d_cohen": round(delta_minimo / std_baseline, 4),
             "alpha": alpha,
-            "power": power,
+            "potencia": power,
         }
 
-    def minimum_detectable_effect(
+    def efecto_minimo_detectable(
         self,
-        n_per_group: int,
-        baseline_rate: float,
+        n_por_grupo: int,
+        tasa_baseline: float,
         alpha: float = 0.05,
         power: float = 0.80,
     ) -> float:
-        """Given a sample size, compute the MDE (minimum detectable effect)."""
+        """Dado un tamaño de muestra, calcula el EMD (Efecto Mínimo Detectable)."""
         z_alpha = stats.norm.ppf(1 - alpha / 2)
-        z_power = stats.norm.ppf(power)
-        p = baseline_rate
-        mde = (z_alpha + z_power) * np.sqrt(2 * p * (1 - p) / n_per_group)
-        return round(float(mde / p), 4)  # relative MDE
+        z_potencia = stats.norm.ppf(power)
+        p = tasa_baseline
+        emd = (z_alpha + z_potencia) * np.sqrt(2 * p * (1 - p) / n_por_grupo)
+        return round(float(emd / p), 4)  # EMD relativo
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# FREQUENTIST A/B TESTER
+# TESTER A/B FRECUENTISTA
 # ──────────────────────────────────────────────────────────────────────────────
 
 class FrequentistABTester:
     """
-    Frequentist hypothesis testing for A/B experiments.
+    Pruebas de hipótesis frecuentistas para experimentos A/B.
 
-    Supports:
-      - Two-proportion z-test (conversion rates)
-      - Two-sample independent t-test (continuous metrics)
-      - Mann-Whitney U test (non-parametric)
-      - Chi-square test (multi-cell contingency)
+    Soporta:
+      - Prueba Z de dos proporciones (tasas de conversión)
+      - T-test independiente de dos muestras (métricas continuas)
+      - Prueba Mann-Whitney U (no paramétrica)
+      - Prueba chi-cuadrado (tabla de contingencia multicelda)
     """
 
     def proportion_test(
         self,
-        control_conversions: int,
-        control_n: int,
-        treatment_conversions: int,
-        treatment_n: int,
+        conversiones_control: int,
+        n_control: int,
+        conversiones_tratamiento: int,
+        n_tratamiento: int,
         alpha: float = 0.05,
-        two_sided: bool = True,
+        dos_colas: bool = True,
     ) -> Dict[str, Any]:
         """
-        Two-proportion z-test for comparing conversion rates.
+        Prueba Z de dos proporciones para comparar tasas de conversión.
 
-        Parameters
+        Parámetros
         ----------
-        control_conversions : int
-            Number of successes in control group.
-        control_n : int
-            Total users in control group.
-        treatment_conversions : int
-            Number of successes in treatment group.
-        treatment_n : int
-            Total users in treatment group.
+        conversiones_control : int
+            Número de éxitos en el grupo de control.
+        n_control : int
+            Total de usuarios en el grupo de control.
+        conversiones_tratamiento : int
+            Número de éxitos en el grupo de tratamiento.
+        n_tratamiento : int
+            Total de usuarios en el grupo de tratamiento.
         alpha : float
-            Significance level.
-        two_sided : bool
-            Two-sided (True) or one-sided test.
+            Nivel de significancia.
+        dos_colas : bool
+            Prueba de dos colas (True) o una cola.
 
-        Returns
+        Retorna
         -------
-        dict with: control_rate, treatment_rate, lift, z_stat, p_value,
-                   confidence_interval, is_significant, recommendation
+        dict con: tasa_control, tasa_tratamiento, incremento, estadistico_z,
+                  p_valor, intervalo_confianza, es_significativo, recomendacion
         """
-        p_c = control_conversions / control_n
-        p_t = treatment_conversions / treatment_n
-        p_pool = (control_conversions + treatment_conversions) / (control_n + treatment_n)
+        p_c = conversiones_control / n_control
+        p_t = conversiones_tratamiento / n_tratamiento
+        p_pool = (conversiones_control + conversiones_tratamiento) / (n_control + n_tratamiento)
 
-        se = np.sqrt(p_pool * (1 - p_pool) * (1 / control_n + 1 / treatment_n))
-        z_stat = (p_t - p_c) / se
-        p_value = 2 * stats.norm.sf(abs(z_stat)) if two_sided else stats.norm.sf(z_stat)
+        ee = np.sqrt(p_pool * (1 - p_pool) * (1 / n_control + 1 / n_tratamiento))
+        z_stat = (p_t - p_c) / ee
+        p_valor = 2 * stats.norm.sf(abs(z_stat)) if dos_colas else stats.norm.sf(z_stat)
 
-        # 95% CI on the difference
-        z_crit = stats.norm.ppf(1 - alpha / 2)
-        se_diff = np.sqrt(p_c * (1 - p_c) / control_n + p_t * (1 - p_t) / treatment_n)
-        ci_low = (p_t - p_c) - z_crit * se_diff
-        ci_high = (p_t - p_c) + z_crit * se_diff
+        # IC del 95% en la diferencia
+        z_critico = stats.norm.ppf(1 - alpha / 2)
+        ee_diff = np.sqrt(p_c * (1 - p_c) / n_control + p_t * (1 - p_t) / n_tratamiento)
+        ic_bajo = (p_t - p_c) - z_critico * ee_diff
+        ic_alto = (p_t - p_c) + z_critico * ee_diff
 
-        significant = p_value < alpha
-        lift = (p_t - p_c) / p_c * 100
+        significativo = p_valor < alpha
+        incremento = (p_t - p_c) / p_c * 100
 
         return {
-            "control_rate": round(p_c, 6),
-            "treatment_rate": round(p_t, 6),
-            "absolute_diff": round(p_t - p_c, 6),
-            "relative_lift_pct": round(lift, 4),
-            "z_statistic": round(float(z_stat), 4),
-            "p_value": round(float(p_value), 6),
-            "confidence_interval_95pct": (round(ci_low, 6), round(ci_high, 6)),
-            "is_significant": bool(significant),
+            "tasa_control": round(p_c, 6),
+            "tasa_tratamiento": round(p_t, 6),
+            "diferencia_absoluta": round(p_t - p_c, 6),
+            "incremento_relativo_pct": round(incremento, 4),
+            "estadistico_z": round(float(z_stat), 4),
+            "p_valor": round(float(p_valor), 6),
+            "intervalo_confianza_95pct": (round(ic_bajo, 6), round(ic_alto, 6)),
+            "es_significativo": bool(significativo),
             "alpha": alpha,
-            "recommendation": (
-                f"Implement treatment — statistically significant lift of {lift:.2f}%."
-                if significant and lift > 0
-                else "Do not implement — no statistically significant improvement."
-                if not significant
-                else "Treatment is significantly worse — do not implement."
+            "recomendacion": (
+                f"Implementar tratamiento — incremento estadísticamente significativo de {incremento:.2f}%."
+                if significativo and incremento > 0
+                else "No implementar — no hay mejora estadísticamente significativa."
+                if not significativo
+                else "El tratamiento es significativamente peor — no implementar."
             ),
         }
 
     def ttest(
         self,
-        control_data: Union[np.ndarray, pd.Series],
-        treatment_data: Union[np.ndarray, pd.Series],
+        datos_control: Union[np.ndarray, pd.Series],
+        datos_tratamiento: Union[np.ndarray, pd.Series],
         alpha: float = 0.05,
-        equal_var: bool = False,
+        varianzas_iguales: bool = False,
     ) -> Dict[str, Any]:
         """
-        Independent samples t-test (Welch's by default).
+        T-test de muestras independientes (Welch por defecto).
 
-        Parameters
+        Parámetros
         ----------
-        control_data : array-like
-            Metric values for the control group.
-        treatment_data : array-like
-            Metric values for the treatment group.
+        datos_control : array-like
+            Valores de la métrica para el grupo de control.
+        datos_tratamiento : array-like
+            Valores de la métrica para el grupo de tratamiento.
         alpha : float
-            Significance level.
-        equal_var : bool
-            Use Student's t-test (True) or Welch's (False).
+            Nivel de significancia.
+        varianzas_iguales : bool
+            Usar t-test de Student (True) o Welch (False).
         """
-        t_stat, p_value = stats.ttest_ind(control_data, treatment_data, equal_var=equal_var)
-        lift = (np.mean(treatment_data) - np.mean(control_data)) / np.mean(control_data) * 100
+        t_stat, p_valor = stats.ttest_ind(datos_control, datos_tratamiento, equal_var=varianzas_iguales)
+        incremento = (np.mean(datos_tratamiento) - np.mean(datos_control)) / np.mean(datos_control) * 100
 
-        # Cohen's d
-        pooled_std = np.sqrt((np.std(control_data) ** 2 + np.std(treatment_data) ** 2) / 2)
-        cohens_d = (np.mean(treatment_data) - np.mean(control_data)) / pooled_std
+        # d de Cohen
+        std_agrupada = np.sqrt((np.std(datos_control) ** 2 + np.std(datos_tratamiento) ** 2) / 2)
+        d_cohen = (np.mean(datos_tratamiento) - np.mean(datos_control)) / std_agrupada
 
-        # CI
-        ci = stats.t.interval(
+        # IC
+        ic = stats.t.interval(
             1 - alpha,
-            df=len(control_data) + len(treatment_data) - 2,
-            loc=np.mean(treatment_data) - np.mean(control_data),
-            scale=stats.sem(np.concatenate([control_data, treatment_data])),
+            df=len(datos_control) + len(datos_tratamiento) - 2,
+            loc=np.mean(datos_tratamiento) - np.mean(datos_control),
+            scale=stats.sem(np.concatenate([datos_control, datos_tratamiento])),
         )
 
         return {
-            "control_mean": round(float(np.mean(control_data)), 6),
-            "treatment_mean": round(float(np.mean(treatment_data)), 6),
-            "relative_lift_pct": round(float(lift), 4),
-            "t_statistic": round(float(t_stat), 4),
-            "p_value": round(float(p_value), 6),
-            "cohens_d": round(float(cohens_d), 4),
-            "effect_size_label": (
-                "small" if abs(cohens_d) < 0.5
-                else "medium" if abs(cohens_d) < 0.8
-                else "large"
+            "media_control": round(float(np.mean(datos_control)), 6),
+            "media_tratamiento": round(float(np.mean(datos_tratamiento)), 6),
+            "incremento_relativo_pct": round(float(incremento), 4),
+            "estadistico_t": round(float(t_stat), 4),
+            "p_valor": round(float(p_valor), 6),
+            "d_cohen": round(float(d_cohen), 4),
+            "tamanio_efecto": (
+                "pequeño" if abs(d_cohen) < 0.5
+                else "mediano" if abs(d_cohen) < 0.8
+                else "grande"
             ),
-            "confidence_interval_95pct": (round(ci[0], 6), round(ci[1], 6)),
-            "is_significant": bool(p_value < alpha),
-            "test_type": "Welch's t-test" if not equal_var else "Student's t-test",
+            "intervalo_confianza_95pct": (round(ic[0], 6), round(ic[1], 6)),
+            "es_significativo": bool(p_valor < alpha),
+            "tipo_prueba": "t-test de Welch" if not varianzas_iguales else "t-test de Student",
         }
 
     def mann_whitney(
         self,
-        control_data: Union[np.ndarray, pd.Series],
-        treatment_data: Union[np.ndarray, pd.Series],
+        datos_control: Union[np.ndarray, pd.Series],
+        datos_tratamiento: Union[np.ndarray, pd.Series],
         alpha: float = 0.05,
     ) -> Dict[str, Any]:
-        """Non-parametric Mann-Whitney U test."""
-        u_stat, p_value = stats.mannwhitneyu(
-            control_data, treatment_data, alternative="two-sided"
+        """Prueba Mann-Whitney U no paramétrica."""
+        u_stat, p_valor = stats.mannwhitneyu(
+            datos_control, datos_tratamiento, alternative="two-sided"
         )
         return {
-            "u_statistic": round(float(u_stat), 4),
-            "p_value": round(float(p_value), 6),
-            "is_significant": bool(p_value < alpha),
-            "control_median": round(float(np.median(control_data)), 6),
-            "treatment_median": round(float(np.median(treatment_data)), 6),
-            "test_type": "Mann-Whitney U (non-parametric)",
+            "estadistico_u": round(float(u_stat), 4),
+            "p_valor": round(float(p_valor), 6),
+            "es_significativo": bool(p_valor < alpha),
+            "mediana_control": round(float(np.median(datos_control)), 6),
+            "mediana_tratamiento": round(float(np.median(datos_tratamiento)), 6),
+            "tipo_prueba": "Mann-Whitney U (no paramétrica)",
         }
 
     def chi_square_test(
-        self, contingency_table: pd.DataFrame, alpha: float = 0.05
+        self, tabla_contingencia: pd.DataFrame, alpha: float = 0.05
     ) -> Dict[str, Any]:
-        """Chi-square test of independence on a contingency table."""
-        chi2, p_value, dof, expected = stats.chi2_contingency(contingency_table)
-        cramers_v = np.sqrt(chi2 / (contingency_table.values.sum() * (min(contingency_table.shape) - 1)))
+        """Prueba chi-cuadrado de independencia sobre una tabla de contingencia."""
+        chi2, p_valor, gl, esperados = stats.chi2_contingency(tabla_contingencia)
+        v_cramer = np.sqrt(chi2 / (tabla_contingencia.values.sum() * (min(tabla_contingencia.shape) - 1)))
         return {
-            "chi2_statistic": round(float(chi2), 4),
-            "p_value": round(float(p_value), 6),
-            "degrees_of_freedom": int(dof),
-            "cramers_v": round(float(cramers_v), 4),
-            "is_significant": bool(p_value < alpha),
-            "expected_frequencies": pd.DataFrame(expected, index=contingency_table.index,
-                                                  columns=contingency_table.columns).round(2),
+            "estadistico_chi2": round(float(chi2), 4),
+            "p_valor": round(float(p_valor), 6),
+            "grados_libertad": int(gl),
+            "v_cramer": round(float(v_cramer), 4),
+            "es_significativo": bool(p_valor < alpha),
+            "frecuencias_esperadas": pd.DataFrame(esperados, index=tabla_contingencia.index,
+                                                   columns=tabla_contingencia.columns).round(2),
         }
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# BAYESIAN A/B TESTER
+# TESTER A/B BAYESIANO
 # ──────────────────────────────────────────────────────────────────────────────
 
 class BayesianABTester:
     """
-    Bayesian A/B testing for binary outcomes (conversions).
+    Pruebas A/B Bayesianas para resultados binarios (conversiones).
 
-    Uses Beta-Binomial conjugate model.
-    Prior: Beta(alpha_prior, beta_prior) — default: Beta(1,1) = uniform
-    Posterior: Beta(alpha_prior + conversions, beta_prior + non-conversions)
+    Utiliza el modelo conjugado Beta-Binomial.
+    Prior: Beta(alpha_prior, beta_prior) — por defecto: Beta(1,1) = uniforme
+    Posterior: Beta(alpha_prior + conversiones, beta_prior + no_conversiones)
     """
 
     def __init__(self, alpha_prior: float = 1.0, beta_prior: float = 1.0):
@@ -329,182 +327,182 @@ class BayesianABTester:
 
     def analyze(
         self,
-        control_conversions: int,
-        control_n: int,
-        treatment_conversions: int,
-        treatment_n: int,
-        n_samples: int = 100_000,
+        conversiones_control: int,
+        n_control: int,
+        conversiones_tratamiento: int,
+        n_tratamiento: int,
+        n_muestras: int = 100_000,
     ) -> Dict[str, Any]:
         """
-        Compute posterior distributions and probability that treatment > control.
+        Calcula distribuciones posteriores y P(tratamiento > control).
 
-        Parameters
+        Parámetros
         ----------
-        control_conversions, control_n : int
-            Control group successes and total.
-        treatment_conversions, treatment_n : int
-            Treatment group successes and total.
-        n_samples : int
-            Monte Carlo samples for P(treatment > control).
+        conversiones_control, n_control : int
+            Éxitos y total del grupo de control.
+        conversiones_tratamiento, n_tratamiento : int
+            Éxitos y total del grupo de tratamiento.
+        n_muestras : int
+            Muestras Monte Carlo para P(tratamiento > control).
 
-        Returns
+        Retorna
         -------
-        dict with posterior stats, P(treatment > control), expected lift
+        dict con estadísticas posteriores, P(tratamiento > control), incremento esperado
         """
-        # Posterior parameters
-        a_c = self.alpha_prior + control_conversions
-        b_c = self.beta_prior + (control_n - control_conversions)
-        a_t = self.alpha_prior + treatment_conversions
-        b_t = self.beta_prior + (treatment_n - treatment_conversions)
+        # Parámetros posteriores
+        a_c = self.alpha_prior + conversiones_control
+        b_c = self.beta_prior + (n_control - conversiones_control)
+        a_t = self.alpha_prior + conversiones_tratamiento
+        b_t = self.beta_prior + (n_tratamiento - conversiones_tratamiento)
 
-        # Posterior means
+        # Medias posteriores
         p_c = a_c / (a_c + b_c)
         p_t = a_t / (a_t + b_t)
 
-        # Monte Carlo P(treatment > control)
-        samples_c = np.random.beta(a_c, b_c, n_samples)
-        samples_t = np.random.beta(a_t, b_t, n_samples)
-        prob_t_wins = float((samples_t > samples_c).mean())
+        # Monte Carlo P(tratamiento > control)
+        muestras_c = np.random.beta(a_c, b_c, n_muestras)
+        muestras_t = np.random.beta(a_t, b_t, n_muestras)
+        prob_t_gana = float((muestras_t > muestras_c).mean())
 
-        # Expected lift distribution
-        expected_lift = samples_t - samples_c
-        lift_mean = float(expected_lift.mean())
-        lift_ci = (float(np.percentile(expected_lift, 2.5)), float(np.percentile(expected_lift, 97.5)))
+        # Distribución del incremento esperado
+        incremento_esperado = muestras_t - muestras_c
+        media_incremento = float(incremento_esperado.mean())
+        ic_incremento = (float(np.percentile(incremento_esperado, 2.5)), float(np.percentile(incremento_esperado, 97.5)))
 
         return {
-            "control_posterior_mean": round(p_c, 6),
-            "treatment_posterior_mean": round(p_t, 6),
-            "prob_treatment_wins": round(prob_t_wins, 4),
-            "prob_control_wins": round(1 - prob_t_wins, 4),
-            "expected_lift_mean": round(lift_mean, 6),
-            "expected_lift_95pct_ci": (round(lift_ci[0], 6), round(lift_ci[1], 6)),
-            "recommendation": (
-                f"Deploy treatment — {prob_t_wins:.1%} probability of improvement."
-                if prob_t_wins >= 0.95
-                else f"Gather more data — {prob_t_wins:.1%} probability treatment wins."
-                if prob_t_wins >= 0.80
-                else f"Control preferred — only {prob_t_wins:.1%} probability treatment wins."
+            "media_posterior_control": round(p_c, 6),
+            "media_posterior_tratamiento": round(p_t, 6),
+            "prob_tratamiento_gana": round(prob_t_gana, 4),
+            "prob_control_gana": round(1 - prob_t_gana, 4),
+            "media_incremento_esperado": round(media_incremento, 6),
+            "ic_95pct_incremento": (round(ic_incremento[0], 6), round(ic_incremento[1], 6)),
+            "recomendacion": (
+                f"Desplegar tratamiento — {prob_t_gana:.1%} de probabilidad de mejora."
+                if prob_t_gana >= 0.95
+                else f"Recopilar más datos — {prob_t_gana:.1%} de probabilidad de que el tratamiento gane."
+                if prob_t_gana >= 0.80
+                else f"Se prefiere el control — solo {prob_t_gana:.1%} de probabilidad de que el tratamiento gane."
             ),
             "prior": f"Beta({self.alpha_prior}, {self.beta_prior})",
         }
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# EXPERIMENT REPORT
+# GENERADOR DE INFORMES
 # ──────────────────────────────────────────────────────────────────────────────
 
 class ExperimentReporter:
-    """Generate a complete Markdown A/B test report."""
+    """Genera un informe completo de prueba A/B en Markdown."""
 
     def generate(
         self,
-        experiment_name: str,
-        frequentist_result: Dict,
-        bayesian_result: Optional[Dict] = None,
-        sample_size_plan: Optional[Dict] = None,
+        nombre_experimento: str,
+        resultado_frecuentista: Dict,
+        resultado_bayesiano: Optional[Dict] = None,
+        plan_tamanio_muestra: Optional[Dict] = None,
     ) -> str:
         """
-        Produce a full Markdown experiment report.
+        Produce un informe completo del experimento en formato Markdown.
 
-        Returns
+        Retorna
         -------
-        str — Markdown formatted report
+        str — Informe formateado en Markdown
         """
-        lines = [
-            f"# A/B Test Report: {experiment_name}",
+        lineas = [
+            f"# Informe de Prueba A/B: {nombre_experimento}",
             "",
-            "## Experiment Summary",
+            "## Resumen del Experimento",
             "",
         ]
 
-        if sample_size_plan:
-            lines += [
-                "### Pre-Experiment Power Analysis",
+        if plan_tamanio_muestra:
+            lineas += [
+                "### Análisis de Potencia Pre-Experimento",
                 "",
-                "| Parameter | Value |",
+                "| Parámetro | Valor |",
                 "|-----------|-------|",
             ]
-            for k, v in sample_size_plan.items():
-                lines.append(f"| {k} | {v} |")
-            lines.append("")
+            for k, v in plan_tamanio_muestra.items():
+                lineas.append(f"| {k} | {v} |")
+            lineas.append("")
 
-        lines += [
-            "## Frequentist Results",
+        lineas += [
+            "## Resultados Frecuentistas",
             "",
-            "| Metric | Value |",
-            "|--------|-------|",
+            "| Métrica | Valor |",
+            "|---------|-------|",
         ]
-        for k, v in frequentist_result.items():
-            if k != "recommendation":
-                lines.append(f"| {k} | {v} |")
+        for k, v in resultado_frecuentista.items():
+            if k != "recomendacion":
+                lineas.append(f"| {k} | {v} |")
 
-        sig_emoji = "✅" if frequentist_result.get("is_significant") else "❌"
-        lines += [
+        emoji_sig = "✅" if resultado_frecuentista.get("es_significativo") else "❌"
+        lineas += [
             "",
-            f"**Decision ({sig_emoji}):** {frequentist_result.get('recommendation', '')}",
+            f"**Decisión ({emoji_sig}):** {resultado_frecuentista.get('recomendacion', '')}",
             "",
         ]
 
-        if bayesian_result:
-            lines += [
-                "## Bayesian Results",
+        if resultado_bayesiano:
+            lineas += [
+                "## Resultados Bayesianos",
                 "",
-                "| Metric | Value |",
-                "|--------|-------|",
+                "| Métrica | Valor |",
+                "|---------|-------|",
             ]
-            for k, v in bayesian_result.items():
-                if k != "recommendation":
-                    lines.append(f"| {k} | {v} |")
-            lines += [
+            for k, v in resultado_bayesiano.items():
+                if k != "recomendacion":
+                    lineas.append(f"| {k} | {v} |")
+            lineas += [
                 "",
-                f"**Bayesian Decision:** {bayesian_result.get('recommendation', '')}",
+                f"**Decisión Bayesiana:** {resultado_bayesiano.get('recomendacion', '')}",
                 "",
             ]
 
-        lines += ["---", "*Report generated by A/B Testing Toolkit*"]
-        return "\n".join(lines)
+        lineas += ["---", "*Informe generado por el Kit de Pruebas A/B — Autor: Dody Dueñas*"]
+        return "\n".join(lineas)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Demo
+# Demostración
 # ──────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     np.random.seed(42)
 
-    # ── Sample Size Planning ──────────────────────────────────────────────────
+    # ── Planificación del tamaño de muestra ──────────────────────────────────
     calc = SampleSizeCalculator()
     plan = calc.for_proportions(baseline_rate=0.05, min_detectable_effect=0.20, power=0.80)
-    print("=== Sample Size Plan ===")
+    print("=== Plan de Tamaño de Muestra ===")
     for k, v in plan.items():
         print(f"  {k}: {v}")
 
-    # ── Frequentist Proportion Test ───────────────────────────────────────────
+    # ── Prueba frecuentista de proporciones ───────────────────────────────────
     tester = FrequentistABTester()
-    freq_result = tester.proportion_test(
-        control_conversions=500, control_n=10000,
-        treatment_conversions=580, treatment_n=10000,
+    resultado_frec = tester.proportion_test(
+        conversiones_control=500, n_control=10000,
+        conversiones_tratamiento=580, n_tratamiento=10000,
     )
-    print("\n=== Frequentist Proportion Test ===")
-    for k, v in freq_result.items():
+    print("\n=== Prueba Frecuentista de Proporciones ===")
+    for k, v in resultado_frec.items():
         print(f"  {k}: {v}")
 
-    # ── Bayesian Analysis ─────────────────────────────────────────────────────
+    # ── Análisis bayesiano ────────────────────────────────────────────────────
     bay_tester = BayesianABTester()
-    bay_result = bay_tester.analyze(
-        control_conversions=500, control_n=10000,
-        treatment_conversions=580, treatment_n=10000,
+    resultado_bay = bay_tester.analyze(
+        conversiones_control=500, n_control=10000,
+        conversiones_tratamiento=580, n_tratamiento=10000,
     )
-    print("\n=== Bayesian Analysis ===")
-    for k, v in bay_result.items():
+    print("\n=== Análisis Bayesiano ===")
+    for k, v in resultado_bay.items():
         print(f"  {k}: {v}")
 
-    # ── Report ────────────────────────────────────────────────────────────────
+    # ── Informe ───────────────────────────────────────────────────────────────
     reporter = ExperimentReporter()
-    report_md = reporter.generate(
-        experiment_name="Homepage CTA Button Color Test",
-        frequentist_result=freq_result,
-        bayesian_result=bay_result,
-        sample_size_plan=plan,
+    informe_md = reporter.generate(
+        nombre_experimento="Prueba de Color del Botón CTA en Página Principal",
+        resultado_frecuentista=resultado_frec,
+        resultado_bayesiano=resultado_bay,
+        plan_tamanio_muestra=plan,
     )
-    print("\n=== Report Preview ===")
-    print(report_md[:800])
+    print("\n=== Vista Previa del Informe ===")
+    print(informe_md[:800])

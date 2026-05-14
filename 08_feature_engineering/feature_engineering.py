@@ -1,15 +1,15 @@
 """
-Feature Engineering Toolkit
-============================
-SOLID-compliant library for automated and manual feature engineering:
-- Date/time feature extraction
-- Polynomial and interaction features
-- Target encoding & frequency encoding
-- Binning and discretization
-- Feature selection via statistical filters
-- Full pipeline orchestration
+Kit de Ingeniería de Características
+======================================
+Librería SOLID para ingeniería de características automatizada y manual:
+- Extracción de características de fecha/hora
+- Características polinomiales e interacciones
+- Codificación por objetivo y por frecuencia
+- Discretización en intervalos (binning)
+- Selección de características por filtros estadísticos
+- Orquestación completa en pipeline
 
-Author: Data Science Analytics Toolkit
+Autor: Dody Dueñas
 """
 
 import numpy as np
@@ -23,233 +23,232 @@ from sklearn.feature_selection import (
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# DATE / TIME FEATURES
+# EXTRACTOR DE CARACTERÍSTICAS FECHA/HORA
 # ──────────────────────────────────────────────────────────────────────────────
 
 class DateTimeFeatureExtractor(BaseEstimator, TransformerMixin):
     """
-    Extract rich temporal features from datetime columns.
+    Extrae características temporales ricas a partir de columnas datetime.
 
-    Features extracted (configurable):
-        year, month, day, hour, minute, day_of_week, day_of_year,
-        week_of_year, quarter, is_weekend, is_month_start, is_month_end,
-        sin/cos cyclical encodings for month, day_of_week, and hour.
+    Características extraídas (configurables):
+        año, mes, día, hora, minuto, día_semana, día_año,
+        semana_año, trimestre, es_fin_semana, es_inicio_mes, es_fin_mes,
+        codificaciones cíclicas sin/cos para mes, día_semana y hora.
     """
 
     def __init__(
         self,
-        columns: Optional[List[str]] = None,
-        cyclical_encoding: bool = True,
-        drop_original: bool = False,
+        columnas: Optional[List[str]] = None,
+        codificacion_ciclica: bool = True,
+        eliminar_original: bool = False,
     ):
-        self.columns = columns
-        self.cyclical_encoding = cyclical_encoding
-        self.drop_original = drop_original
+        self.columnas = columnas
+        self.codificacion_ciclica = codificacion_ciclica
+        self.eliminar_original = eliminar_original
 
     def fit(self, X: pd.DataFrame, y=None) -> "DateTimeFeatureExtractor":
-        """Detect datetime columns if none specified."""
-        if self.columns is None:
+        """Detecta columnas datetime si no se especifican."""
+        if self.columnas is None:
             self._cols = X.select_dtypes(include=["datetime64"]).columns.tolist()
         else:
-            self._cols = self.columns
+            self._cols = self.columnas
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        """Extract features from all datetime columns."""
+        """Extrae características de todas las columnas datetime."""
         df = X.copy()
         for col in self._cols:
             dt = pd.to_datetime(df[col])
-            df[f"{col}_year"] = dt.dt.year
-            df[f"{col}_month"] = dt.dt.month
-            df[f"{col}_day"] = dt.dt.day
-            df[f"{col}_hour"] = dt.dt.hour
-            df[f"{col}_day_of_week"] = dt.dt.dayofweek
-            df[f"{col}_day_of_year"] = dt.dt.dayofyear
-            df[f"{col}_week_of_year"] = dt.dt.isocalendar().week.astype(int)
-            df[f"{col}_quarter"] = dt.dt.quarter
-            df[f"{col}_is_weekend"] = dt.dt.dayofweek.isin([5, 6]).astype(int)
-            df[f"{col}_is_month_start"] = dt.dt.is_month_start.astype(int)
-            df[f"{col}_is_month_end"] = dt.dt.is_month_end.astype(int)
+            df[f"{col}_año"] = dt.dt.year
+            df[f"{col}_mes"] = dt.dt.month
+            df[f"{col}_dia"] = dt.dt.day
+            df[f"{col}_hora"] = dt.dt.hour
+            df[f"{col}_dia_semana"] = dt.dt.dayofweek
+            df[f"{col}_dia_año"] = dt.dt.dayofyear
+            df[f"{col}_semana_año"] = dt.dt.isocalendar().week.astype(int)
+            df[f"{col}_trimestre"] = dt.dt.quarter
+            df[f"{col}_es_fin_semana"] = dt.dt.dayofweek.isin([5, 6]).astype(int)
+            df[f"{col}_es_inicio_mes"] = dt.dt.is_month_start.astype(int)
+            df[f"{col}_es_fin_mes"] = dt.dt.is_month_end.astype(int)
 
-            if self.cyclical_encoding:
-                df[f"{col}_month_sin"] = np.sin(2 * np.pi * dt.dt.month / 12)
-                df[f"{col}_month_cos"] = np.cos(2 * np.pi * dt.dt.month / 12)
-                df[f"{col}_dow_sin"] = np.sin(2 * np.pi * dt.dt.dayofweek / 7)
-                df[f"{col}_dow_cos"] = np.cos(2 * np.pi * dt.dt.dayofweek / 7)
-                df[f"{col}_hour_sin"] = np.sin(2 * np.pi * dt.dt.hour / 24)
-                df[f"{col}_hour_cos"] = np.cos(2 * np.pi * dt.dt.hour / 24)
+            if self.codificacion_ciclica:
+                df[f"{col}_mes_sin"] = np.sin(2 * np.pi * dt.dt.month / 12)
+                df[f"{col}_mes_cos"] = np.cos(2 * np.pi * dt.dt.month / 12)
+                df[f"{col}_dsem_sin"] = np.sin(2 * np.pi * dt.dt.dayofweek / 7)
+                df[f"{col}_dsem_cos"] = np.cos(2 * np.pi * dt.dt.dayofweek / 7)
+                df[f"{col}_hora_sin"] = np.sin(2 * np.pi * dt.dt.hour / 24)
+                df[f"{col}_hora_cos"] = np.cos(2 * np.pi * dt.dt.hour / 24)
 
-            if self.drop_original:
+            if self.eliminar_original:
                 df = df.drop(columns=[col])
 
         return df
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# POLYNOMIAL & INTERACTION FEATURES
+# GENERADOR DE CARACTERÍSTICAS POLINOMIALES
 # ──────────────────────────────────────────────────────────────────────────────
 
 class PolynomialFeatureGenerator(BaseEstimator, TransformerMixin):
     """
-    Generate polynomial and interaction features for numeric columns.
+    Genera características polinomiales e interacciones para columnas numéricas.
 
-    Wraps sklearn PolynomialFeatures with a pandas-friendly interface.
+    Envuelve PolynomialFeatures de sklearn con interfaz compatible con pandas.
     """
 
     def __init__(
         self,
-        columns: Optional[List[str]] = None,
-        degree: int = 2,
-        interaction_only: bool = False,
-        include_bias: bool = False,
+        columnas: Optional[List[str]] = None,
+        grado: int = 2,
+        solo_interacciones: bool = False,
+        incluir_sesgo: bool = False,
     ):
-        self.columns = columns
-        self.degree = degree
-        self.interaction_only = interaction_only
-        self.include_bias = include_bias
+        self.columnas = columnas
+        self.grado = grado
+        self.solo_interacciones = solo_interacciones
+        self.incluir_sesgo = incluir_sesgo
         self._poly = None
-        self._feature_names: List[str] = []
+        self._nombres_caracteristicas: List[str] = []
 
     def fit(self, X: pd.DataFrame, y=None) -> "PolynomialFeatureGenerator":
-        cols = self.columns or X.select_dtypes(include=np.number).columns.tolist()
+        cols = self.columnas or X.select_dtypes(include=np.number).columns.tolist()
         self._cols = cols
         self._poly = PolynomialFeatures(
-            degree=self.degree,
-            interaction_only=self.interaction_only,
-            include_bias=self.include_bias,
+            degree=self.grado,
+            interaction_only=self.solo_interacciones,
+            include_bias=self.incluir_sesgo,
         )
         self._poly.fit(X[cols])
-        self._feature_names = self._poly.get_feature_names_out(cols).tolist()
+        self._nombres_caracteristicas = self._poly.get_feature_names_out(cols).tolist()
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        poly_array = self._poly.transform(X[self._cols])
-        poly_df = pd.DataFrame(poly_array, columns=self._feature_names, index=X.index)
-        # Drop original columns to avoid duplication, keep new ones
-        original_cols = [c for c in X.columns if c not in self._cols]
-        return pd.concat([X[original_cols].reset_index(drop=True),
-                          poly_df.reset_index(drop=True)], axis=1)
+        arreglo_poly = self._poly.transform(X[self._cols])
+        df_poly = pd.DataFrame(arreglo_poly, columns=self._nombres_caracteristicas, index=X.index)
+        cols_originales = [c for c in X.columns if c not in self._cols]
+        return pd.concat([X[cols_originales].reset_index(drop=True),
+                          df_poly.reset_index(drop=True)], axis=1)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# TARGET ENCODING
+# CODIFICADOR POR OBJETIVO (TARGET ENCODING)
 # ──────────────────────────────────────────────────────────────────────────────
 
 class TargetEncoder(BaseEstimator, TransformerMixin):
     """
-    Mean target encoding for categorical variables with smoothing
-    to prevent overfitting on rare categories.
+    Codificación por media objetivo para variables categóricas con suavizado
+    para evitar sobreajuste en categorías poco frecuentes.
 
-    Formula (smoothed):
-        encoded = (n * category_mean + m * global_mean) / (n + m)
-    where m is the smoothing factor (min_samples_leaf).
+    Fórmula (suavizada):
+        codificado = (n * media_categoria + m * media_global) / (n + m)
+    donde m es el factor de suavizado (min_samples_leaf).
     """
 
     def __init__(
         self,
-        columns: Optional[List[str]] = None,
-        smoothing: float = 10.0,
+        columnas: Optional[List[str]] = None,
+        suavizado: float = 10.0,
     ):
-        self.columns = columns
-        self.smoothing = smoothing
-        self._encodings: Dict[str, Dict[Any, float]] = {}
-        self._global_mean: float = 0.0
+        self.columnas = columnas
+        self.suavizado = suavizado
+        self._codificaciones: Dict[str, Dict[Any, float]] = {}
+        self._media_global: float = 0.0
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> "TargetEncoder":
-        cols = self.columns or X.select_dtypes(include=["object", "category"]).columns.tolist()
+        cols = self.columnas or X.select_dtypes(include=["object", "category"]).columns.tolist()
         self._cols = cols
-        self._global_mean = float(y.mean())
+        self._media_global = float(y.mean())
         for col in cols:
-            df_tmp = pd.DataFrame({"cat": X[col], "target": y})
-            stats = df_tmp.groupby("cat")["target"].agg(["count", "mean"])
-            smooth = (
-                (stats["count"] * stats["mean"] + self.smoothing * self._global_mean)
-                / (stats["count"] + self.smoothing)
+            df_tmp = pd.DataFrame({"cat": X[col], "objetivo": y})
+            stats = df_tmp.groupby("cat")["objetivo"].agg(["count", "mean"])
+            suav = (
+                (stats["count"] * stats["mean"] + self.suavizado * self._media_global)
+                / (stats["count"] + self.suavizado)
             )
-            self._encodings[col] = smooth.to_dict()
+            self._codificaciones[col] = suav.to_dict()
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         df = X.copy()
         for col in self._cols:
-            df[f"{col}_target_enc"] = df[col].map(self._encodings[col]).fillna(self._global_mean)
+            df[f"{col}_enc_objetivo"] = df[col].map(self._codificaciones[col]).fillna(self._media_global)
         return df
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# FREQUENCY ENCODING
+# CODIFICADOR POR FRECUENCIA
 # ──────────────────────────────────────────────────────────────────────────────
 
 class FrequencyEncoder(BaseEstimator, TransformerMixin):
     """
-    Encode categorical variables by their frequency (proportion) in the training set.
-    Useful when cardinality is high and order doesn't matter.
+    Codifica variables categóricas por su frecuencia (proporción) en el conjunto de entrenamiento.
+    Útil cuando la cardinalidad es alta y el orden no importa.
     """
 
-    def __init__(self, columns: Optional[List[str]] = None, normalize: bool = True):
-        self.columns = columns
-        self.normalize = normalize
-        self._freq_maps: Dict[str, Dict[Any, float]] = {}
+    def __init__(self, columnas: Optional[List[str]] = None, normalizar: bool = True):
+        self.columnas = columnas
+        self.normalizar = normalizar
+        self._mapas_frecuencia: Dict[str, Dict[Any, float]] = {}
 
     def fit(self, X: pd.DataFrame, y=None) -> "FrequencyEncoder":
-        cols = self.columns or X.select_dtypes(include=["object", "category"]).columns.tolist()
+        cols = self.columnas or X.select_dtypes(include=["object", "category"]).columns.tolist()
         self._cols = cols
         for col in cols:
-            freq = X[col].value_counts(normalize=self.normalize)
-            self._freq_maps[col] = freq.to_dict()
+            frec = X[col].value_counts(normalize=self.normalizar)
+            self._mapas_frecuencia[col] = frec.to_dict()
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         df = X.copy()
         for col in self._cols:
-            df[f"{col}_freq_enc"] = df[col].map(self._freq_maps[col]).fillna(0)
+            df[f"{col}_enc_frec"] = df[col].map(self._mapas_frecuencia[col]).fillna(0)
         return df
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# BINNING / DISCRETIZATION
+# DISCRETIZADOR (BINNING)
 # ──────────────────────────────────────────────────────────────────────────────
 
 class Binner(BaseEstimator, TransformerMixin):
     """
-    Discretize continuous numerical features into bins.
-    Supports equal-width, equal-frequency (quantile), and custom bins.
+    Discretiza características numéricas continuas en intervalos.
+    Soporta ancho igual, cuantiles (frecuencia igual) e intervalos personalizados.
     """
 
     def __init__(
         self,
-        columns: Optional[List[str]] = None,
+        columnas: Optional[List[str]] = None,
         n_bins: int = 5,
-        strategy: str = "quantile",
-        labels: Optional[List[str]] = None,
+        estrategia: str = "quantile",
+        etiquetas: Optional[List[str]] = None,
     ):
-        self.columns = columns
+        self.columnas = columnas
         self.n_bins = n_bins
-        self.strategy = strategy
-        self.labels = labels
-        self._bin_edges: Dict[str, np.ndarray] = {}
+        self.estrategia = estrategia
+        self.etiquetas = etiquetas
+        self._bordes_bins: Dict[str, np.ndarray] = {}
 
     def fit(self, X: pd.DataFrame, y=None) -> "Binner":
-        cols = self.columns or X.select_dtypes(include=np.number).columns.tolist()
+        cols = self.columnas or X.select_dtypes(include=np.number).columns.tolist()
         self._cols = cols
         for col in cols:
-            if self.strategy == "quantile":
-                quantiles = np.linspace(0, 100, self.n_bins + 1)
-                edges = np.percentile(X[col].dropna(), quantiles)
-            elif self.strategy == "uniform":
-                edges = np.linspace(X[col].min(), X[col].max(), self.n_bins + 1)
+            if self.estrategia == "quantile":
+                cuantiles = np.linspace(0, 100, self.n_bins + 1)
+                bordes = np.percentile(X[col].dropna(), cuantiles)
+            elif self.estrategia == "uniform":
+                bordes = np.linspace(X[col].min(), X[col].max(), self.n_bins + 1)
             else:
-                raise ValueError("strategy must be 'quantile' or 'uniform'.")
-            self._bin_edges[col] = np.unique(edges)
+                raise ValueError("La estrategia debe ser 'quantile' o 'uniform'.")
+            self._bordes_bins[col] = np.unique(bordes)
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         df = X.copy()
         for col in self._cols:
-            df[f"{col}_binned"] = pd.cut(
+            df[f"{col}_bin"] = pd.cut(
                 df[col],
-                bins=self._bin_edges[col],
-                labels=self.labels,
+                bins=self._bordes_bins[col],
+                labels=self.etiquetas,
                 include_lowest=True,
                 duplicates="drop",
             )
@@ -257,20 +256,20 @@ class Binner(BaseEstimator, TransformerMixin):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# FEATURE SELECTION
+# SELECTOR DE CARACTERÍSTICAS
 # ──────────────────────────────────────────────────────────────────────────────
 
 class StatisticalFeatureSelector(BaseEstimator, TransformerMixin):
     """
-    Select top-k features using statistical scoring functions.
+    Selecciona las k mejores características usando funciones de puntuación estadística.
 
-    Supports:
-        - f_classif       : ANOVA F-test (classification)
-        - f_regression    : F-test (regression)
-        - mutual_info     : Mutual information (classification)
+    Soporta:
+        - f_classif       : Prueba F ANOVA (clasificación)
+        - f_regression    : Prueba F (regresión)
+        - mutual_info     : Información mutua (clasificación)
     """
 
-    SCORE_FUNCS = {
+    FUNCIONES_PUNTUACION = {
         "f_classif": f_classif,
         "f_regression": f_regression,
         "mutual_info": mutual_info_classif,
@@ -278,55 +277,55 @@ class StatisticalFeatureSelector(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        score_func: str = "f_classif",
+        funcion_puntuacion: str = "f_classif",
         k: Union[int, str] = 10,
     ):
-        if score_func not in self.SCORE_FUNCS:
-            raise ValueError(f"score_func must be one of {list(self.SCORE_FUNCS.keys())}")
-        self.score_func = score_func
+        if funcion_puntuacion not in self.FUNCIONES_PUNTUACION:
+            raise ValueError(f"funcion_puntuacion debe ser una de {list(self.FUNCIONES_PUNTUACION.keys())}")
+        self.funcion_puntuacion = funcion_puntuacion
         self.k = k
         self._selector = None
-        self._selected_columns: List[str] = []
+        self._columnas_seleccionadas: List[str] = []
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> "StatisticalFeatureSelector":
-        numeric_X = X.select_dtypes(include=np.number)
-        self._all_numeric_cols = numeric_X.columns.tolist()
+        X_numerico = X.select_dtypes(include=np.number)
+        self._todas_cols_numericas = X_numerico.columns.tolist()
         self._selector = SelectKBest(
-            score_func=self.SCORE_FUNCS[self.score_func],
-            k=min(self.k, len(self._all_numeric_cols)) if isinstance(self.k, int) else self.k,
+            score_func=self.FUNCIONES_PUNTUACION[self.funcion_puntuacion],
+            k=min(self.k, len(self._todas_cols_numericas)) if isinstance(self.k, int) else self.k,
         )
-        self._selector.fit(numeric_X.fillna(0), y)
-        mask = self._selector.get_support()
-        self._selected_columns = [c for c, s in zip(self._all_numeric_cols, mask) if s]
+        self._selector.fit(X_numerico.fillna(0), y)
+        mascara = self._selector.get_support()
+        self._columnas_seleccionadas = [c for c, s in zip(self._todas_cols_numericas, mascara) if s]
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        non_numeric = X.select_dtypes(exclude=np.number)
-        return pd.concat([non_numeric, X[self._selected_columns]], axis=1)
+        no_numericas = X.select_dtypes(exclude=np.number)
+        return pd.concat([no_numericas, X[self._columnas_seleccionadas]], axis=1)
 
-    def feature_scores(self) -> pd.DataFrame:
-        """Return feature importances as a sorted DataFrame."""
-        scores = self._selector.scores_
+    def puntuaciones_caracteristicas(self) -> pd.DataFrame:
+        """Retorna las importancias de características como DataFrame ordenado."""
+        puntuaciones = self._selector.scores_
         return (
-            pd.DataFrame({"feature": self._all_numeric_cols, "score": scores})
-            .sort_values("score", ascending=False)
+            pd.DataFrame({"caracteristica": self._todas_cols_numericas, "puntuacion": puntuaciones})
+            .sort_values("puntuacion", ascending=False)
             .reset_index(drop=True)
         )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# FULL PIPELINE
+# PIPELINE COMPLETO
 # ──────────────────────────────────────────────────────────────────────────────
 
 class FeatureEngineeringPipeline:
     """
-    Orchestrate all feature engineering steps:
-      1. DateTime extraction
-      2. Frequency encoding for categoricals
-      3. Target encoding (if target provided)
-      4. Polynomial features
-      5. Binning
-      6. Feature selection
+    Orquesta todos los pasos de ingeniería de características:
+      1. Extracción de características datetime
+      2. Codificación por frecuencia para categóricas
+      3. Codificación por objetivo (si se proporciona y)
+      4. Características polinomiales
+      5. Discretización (binning)
+      6. Selección de características
     """
 
     def __init__(
@@ -346,81 +345,80 @@ class FeatureEngineeringPipeline:
         self.n_bins = n_bins
         self.k_best = k_best
         self.task = task
-
-        self._steps: List[Any] = []
+        self._pasos: List[Any] = []
 
     def fit_transform(self, X: pd.DataFrame, y: Optional[pd.Series] = None) -> pd.DataFrame:
-        """Fit and transform the dataset through all feature engineering steps."""
+        """Ajusta y transforma el conjunto de datos a través de todos los pasos de ingeniería."""
         df = X.copy()
 
         # 1. DateTime
         if self.datetime_cols:
-            dt_extractor = DateTimeFeatureExtractor(columns=self.datetime_cols, drop_original=True)
-            df = dt_extractor.fit_transform(df)
-            self._steps.append(("datetime", dt_extractor))
+            extractor_dt = DateTimeFeatureExtractor(columnas=self.datetime_cols, eliminar_original=True)
+            df = extractor_dt.fit_transform(df)
+            self._pasos.append(("datetime", extractor_dt))
 
-        # 2. Frequency encoding
-        freq_encoder = FrequencyEncoder(columns=self.cat_cols)
-        df = freq_encoder.fit_transform(df)
-        self._steps.append(("freq_enc", freq_encoder))
+        # 2. Codificación por frecuencia
+        enc_frec = FrequencyEncoder(columnas=self.cat_cols)
+        df = enc_frec.fit_transform(df)
+        self._pasos.append(("enc_frec", enc_frec))
 
-        # 3. Target encoding (only if y provided)
+        # 3. Codificación por objetivo (solo si se proporciona y)
         if y is not None and self.cat_cols:
-            target_encoder = TargetEncoder(columns=self.cat_cols)
-            df = target_encoder.fit(df, y).transform(df)
-            self._steps.append(("target_enc", target_encoder))
+            enc_objetivo = TargetEncoder(columnas=self.cat_cols)
+            df = enc_objetivo.fit(df, y).transform(df)
+            self._pasos.append(("enc_objetivo", enc_objetivo))
 
-        # 4. Binning
-        binner = Binner(columns=self.num_cols, n_bins=self.n_bins)
-        df = binner.fit_transform(df)
-        self._steps.append(("binner", binner))
+        # 4. Discretización
+        discretizador = Binner(columnas=self.num_cols, n_bins=self.n_bins)
+        df = discretizador.fit_transform(df)
+        self._pasos.append(("discretizador", discretizador))
 
-        # 5. Feature selection
+        # 5. Selección de características
         if y is not None:
-            score_func = "f_classif" if self.task == "classification" else "f_regression"
-            selector = StatisticalFeatureSelector(score_func=score_func, k=self.k_best)
+            func_punt = "f_classif" if self.task == "classification" else "f_regression"
+            selector = StatisticalFeatureSelector(funcion_puntuacion=func_punt, k=self.k_best)
             df = selector.fit_transform(df, y)
-            self._steps.append(("selector", selector))
+            self._pasos.append(("selector", selector))
 
         return df
 
     def get_feature_scores(self) -> Optional[pd.DataFrame]:
-        """Retrieve feature scores from the selector step (if applied)."""
-        for name, step in self._steps:
-            if name == "selector":
-                return step.feature_scores()
+        """Recupera las puntuaciones del paso de selección (si se aplicó)."""
+        for nombre, paso in self._pasos:
+            if nombre == "selector":
+                return paso.puntuaciones_caracteristicas()
         return None
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Demo
+# Demostración
 # ──────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     np.random.seed(42)
     n = 500
     df = pd.DataFrame(
         {
-            "signup_date": pd.date_range("2022-01-01", periods=n, freq="D"),
-            "category": np.random.choice(["A", "B", "C", "D"], n),
-            "region": np.random.choice(["North", "South", "East", "West"], n),
-            "age": np.random.randint(18, 70, n),
-            "income": np.random.normal(50000, 15000, n),
-            "score": np.random.uniform(0, 100, n),
+            "fecha_registro": pd.date_range("2022-01-01", periods=n, freq="D"),
+            "categoria": np.random.choice(["A", "B", "C", "D"], n),
+            "region": np.random.choice(["Norte", "Sur", "Este", "Oeste"], n),
+            "edad": np.random.randint(18, 70, n),
+            "ingresos": np.random.normal(50000, 15000, n),
+            "puntaje": np.random.uniform(0, 100, n),
         }
     )
     y = pd.Series(np.random.randint(0, 2, n), name="churn")
 
     pipeline = FeatureEngineeringPipeline(
-        datetime_cols=["signup_date"],
-        cat_cols=["category", "region"],
-        num_cols=["age", "income", "score"],
+        datetime_cols=["fecha_registro"],
+        cat_cols=["categoria", "region"],
+        num_cols=["edad", "ingresos", "puntaje"],
         poly_degree=2,
         n_bins=5,
         k_best=15,
         task="classification",
     )
-    df_engineered = pipeline.fit_transform(df, y)
-    print(f"Original shape: {df.shape}")
-    print(f"Engineered shape: {df_engineered.shape}")
-    print("\nTop features by F-score:")
+    df_ingenieria = pipeline.fit_transform(df, y)
+    print(f"Forma original:    {df.shape}")
+    print(f"Forma con ingeniería: {df_ingenieria.shape}")
+    print("\nTop 10 características por puntuación F:")
     print(pipeline.get_feature_scores().head(10))
