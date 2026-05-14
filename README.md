@@ -31,25 +31,37 @@ Abre **http://localhost:8501** en tu navegador. El dashboard incluye:
 
 ## 🗂️ Estructura del Repositorio
 
-```
+```text
 data-science-analytics-toolkit/
-│
-├── dashboard.py                  # Dashboard Streamlit interactivo
-├── demo_proyecto_completo.py     # Demo de consola de todos los módulos
-│
-├── 01_eda_template/              # Plantilla maestra de EDA (18 pasos)
-├── 02_data_cleaning_utils/       # Utilidades de limpieza de datos
-├── 03_ml_pipeline/               # Pipeline automatizado de Machine Learning
-├── 04_sql_analytics/             # Queries SQL avanzadas de negocio
-├── 05_statistical_analysis/      # Toolkit de análisis estadístico
-├── 06_customer_support_analysis/ # Análisis real con arquitectura SOLID
-├── 07_time_series/               # Análisis de series de tiempo
-├── 08_feature_engineering/       # Ingeniería de características automatizada
-├── 09_model_evaluation/          # Evaluación y comparación de modelos ML
-├── 10_data_visualization/        # Gráficos y dashboards profesionales
-├── 11_nlp_toolkit/               # Procesamiento de lenguaje natural
-├── 12_data_profiling/            # Perfilado y calidad de datos
-└── 13_ab_testing/                # Pruebas A/B y análisis de experimentos
+├── data/                             # Datasets del proyecto
+│   └── customer_support_data.csv     # (Dataset real 976K filas)
+├── docs/                             # Outputs generados por el pipeline (PNGs, JSON, MD)
+├── notebooks/                        # Plantillas y exploración interactiva
+│   ├── 01_eda_template/
+│   ├── 04_sql_analytics/
+│   └── 06_customer_support_analysis/
+├── src/                              # Código fuente principal (Arquitectura SOLID)
+│   ├── app/                          
+│   │   └── dashboard.py              # Aplicación web interactiva (Streamlit)
+│   ├── core/                         
+│   │   └── steps.py                  # Patrón Strategy (Módulos inyectables)
+│   ├── patterns/                     
+│   │   ├── facade.py                 # Patrón Facade (Orquestador)
+│   │   ├── interfaces.py             # Interfaces DIP (Observer, PipelineStep)
+│   │   └── observer.py               # Patrón Observer (Logger, Eventos)
+│   ├── modules/                      # Motores analíticos independientes
+│   │   ├── 02_data_cleaning_utils/
+│   │   ├── 03_ml_pipeline/
+│   │   ├── 05_statistical_analysis/
+│   │   ├── 07_time_series/
+│   │   ├── 08_feature_engineering/
+│   │   ├── 09_model_evaluation/
+│   │   ├── 10_data_visualization/
+│   │   ├── 11_nlp_toolkit/
+│   │   ├── 12_data_profiling/
+│   │   └── 13_ab_testing/
+│   └── main.py                       # Orquestador maestro del proyecto
+└── README.md
 ```
 
 ---

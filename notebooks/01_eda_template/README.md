@@ -1,6 +1,11 @@
 # 📊 EDA Template — Plantilla Maestra de Análisis Exploratorio
 
-Notebook interactivo de **18 pasos** para realizar un Análisis Exploratorio de Datos (EDA) completo y profesional sobre cualquier dataset tabular.
+> [!IMPORTANT]
+> **ESTO ES SOLO UN EJEMPLO / PLANTILLA VACÍA.** 
+> Esta carpeta contiene un esqueleto genérico de 18 pasos. Si buscas el **análisis real y completo** de los tickets de Customer Support, dirígete a la carpeta:
+> 👉 `notebooks/06_customer_support_analysis/notebooks/01_customer_support_eda.ipynb`
+
+Notebook interactivo genérico de **18 pasos** para realizar un Análisis Exploratorio de Datos (EDA) completo y profesional sobre cualquier dataset tabular.
 
 ## 📁 Estructura
 
