@@ -1,3 +1,26 @@
+# Analytics Toolkit · Python y SQL
+
+Colección de componentes de análisis y un dashboard de Customer Support Analytics.
+
+**Para revisar:** `src/app/dashboard.py, src/modules, notebooks/04_sql_analytics`.
+
+**Contexto:** La ruta de arranque corregida es src/app/dashboard.py. La muestra del dashboard carga las primeras filas del CSV; no es una muestra aleatoria.
+
+## Inicio
+
+Desde la raíz del repositorio, en un entorno virtual con sus datos disponibles:
+
+```bash
+python -m pip install -r requirements.txt
+python -m streamlit run src/app/dashboard.py
+```
+
+Consulta [el caso de proyecto](docs/PORTFOLIO_CASE.md) para el alcance y los criterios de revisión.
+
+---
+
+## Documentación detallada existente
+
 # 📦 Data Science & Analytics Toolkit
 
 Colección de herramientas profesionales de **Data Science** y **Análisis de Datos** construidas en Python, con arquitectura SOLID y código listo para producción.
@@ -12,7 +35,7 @@ El proyecto incluye un **dashboard web interactivo** construido con **Streamlit*
 
 ```bash
 # Iniciar el dashboard
-python -m streamlit run dashboard.py
+python -m streamlit run src/app/dashboard.py
 ```
 
 Abre **http://localhost:8501** en tu navegador. El dashboard incluye:
