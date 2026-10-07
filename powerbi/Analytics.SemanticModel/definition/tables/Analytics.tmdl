@@ -40,9 +40,9 @@ table Analytics
 	partition Analytics = m
 		mode: import
 		source =
-			let
-			    Source = Csv.Document(File.Contents(DataFolder & "analytics.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
-			    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
-			    Typed = Table.TransformColumnTypes(Headers, {{"Canal", type text}, {"Sentimiento", type text}, {"Urgencia", type text}, {"Resultado", type text}, {"Conversaciones", Int64.Type}}, "en-US")
-			in
-			    Typed
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "analytics.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"Canal", type text}, {"Sentimiento", type text}, {"Urgencia", type text}, {"Resultado", type text}, {"Conversaciones", Int64.Type}}, "en-US")
+				in
+				    Typed
