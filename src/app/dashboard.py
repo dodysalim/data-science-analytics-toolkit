@@ -11,7 +11,7 @@ import pandas as pd
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.dirname(APP_DIR)
 REPO_DIR = os.path.dirname(SRC_DIR)
-DATA = os.path.join(REPO_DIR, "data", "customer_support_data.csv")
+DATA = os.environ.get("CUSTOMER_SUPPORT_DATA", os.path.join(REPO_DIR, "data", "customer_support_data.csv"))
 
 for mod in ["12_data_profiling","11_nlp_toolkit","13_ab_testing"]:
     sys.path.insert(0, os.path.join(SRC_DIR, "modules", mod))
@@ -74,14 +74,21 @@ st.sidebar.caption(f"Fuente: customer_support_data.csv")
 # ── Carga de datos ─────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Cargando datos reales...")
 def cargar_datos(n):
+    with open(DATA, encoding="utf-8") as source:
+        if source.readline().startswith("version https://git-lfs.github.com/spec/"):
+            raise ValueError("Falta descargar el dataset: ejecuta git lfs pull en la raíz del repositorio o configura CUSTOMER_SUPPORT_DATA con un CSV disponible.")
     df = pd.read_csv(DATA, nrows=n, parse_dates=["timestamp"])
-    conv = df[df["role"] == "customer"].drop_duplicates("conv_id")
+    conv = df[df["role"] == "customer"].drop_duplicates("conv_id").copy()
     conv["fecha"] = pd.to_datetime(conv["timestamp"]).dt.date
     conv["hora"]  = pd.to_datetime(conv["timestamp"]).dt.hour
     conv["mes"]   = pd.to_datetime(conv["timestamp"]).dt.to_period("M").astype(str)
     return df, conv
 
-df_raw, df = cargar_datos(n_filas)
+try:
+    df_raw, df = cargar_datos(n_filas)
+except (OSError, ValueError) as exc:
+    st.error(str(exc))
+    st.stop()
 
 # ── Router ────────────────────────────────────────────────────────────────────
 if pagina == "🏠 Resumen Ejecutivo":
