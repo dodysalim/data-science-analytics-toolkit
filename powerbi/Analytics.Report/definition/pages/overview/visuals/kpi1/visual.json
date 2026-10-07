@@ -153,10 +153,10 @@
                       "Entity": "Analytics"
                     }
                   },
-                  "Property": "Resueltas"
+                  "Property": "KPI_Resueltas"
                 }
               },
-              "queryRef": "Analytics.Resueltas",
+              "queryRef": "Analytics.KPI_Resueltas",
               "nativeQueryRef": "Resueltas",
               "displayName": "Resueltas",
               "format": "#,0"

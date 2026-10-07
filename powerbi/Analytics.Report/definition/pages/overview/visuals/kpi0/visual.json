@@ -153,10 +153,10 @@
                       "Entity": "Analytics"
                     }
                   },
-                  "Property": "Conversaciones"
+                  "Property": "KPI_Conversaciones"
                 }
               },
-              "queryRef": "Analytics.Conversaciones",
+              "queryRef": "Analytics.KPI_Conversaciones",
               "nativeQueryRef": "Conversaciones",
               "displayName": "Conversaciones",
               "format": "#,0"

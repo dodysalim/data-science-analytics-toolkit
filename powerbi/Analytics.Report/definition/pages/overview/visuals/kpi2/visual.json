@@ -153,10 +153,10 @@
                       "Entity": "Analytics"
                     }
                   },
-                  "Property": "UrgenciaAlta"
+                  "Property": "KPI_UrgenciaAlta"
                 }
               },
-              "queryRef": "Analytics.UrgenciaAlta",
+              "queryRef": "Analytics.KPI_UrgenciaAlta",
               "nativeQueryRef": "UrgenciaAlta",
               "displayName": "UrgenciaAlta",
               "format": "#,0"

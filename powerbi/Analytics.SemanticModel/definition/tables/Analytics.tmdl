@@ -25,15 +25,15 @@ table Analytics
 		summarizeBy: none
 		sourceColumn: Conversaciones
 
-	measure Conversaciones = SUM(Analytics[Conversaciones])
+	measure KPI_Conversaciones = SUM(Analytics[Conversaciones])
 		formatString: #,0.00
 		displayFolder: KPIs
 
-	measure Resueltas = CALCULATE(SUM(Analytics[Conversaciones]), Analytics[Resultado] = "Resolved")
+	measure KPI_Resueltas = CALCULATE(SUM(Analytics[Conversaciones]), Analytics[Resultado] = "Resolved")
 		formatString: #,0.00
 		displayFolder: KPIs
 
-	measure UrgenciaAlta = CALCULATE(SUM(Analytics[Conversaciones]), Analytics[Urgencia] = "high")
+	measure KPI_UrgenciaAlta = CALCULATE(SUM(Analytics[Conversaciones]), Analytics[Urgencia] = "high")
 		formatString: #,0.00
 		displayFolder: KPIs
 
