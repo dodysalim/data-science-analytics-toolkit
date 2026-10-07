@@ -1,0 +1,48 @@
+table Analytics
+
+	column Canal
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Canal
+
+	column Sentimiento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Sentimiento
+
+	column Urgencia
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Urgencia
+
+	column Resultado
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Resultado
+
+	column Conversaciones
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Conversaciones
+
+	measure Conversaciones = SUM(Analytics[Conversaciones])
+		formatString: #,0.00
+		displayFolder: KPIs
+
+	measure Resueltas = CALCULATE(SUM(Analytics[Conversaciones]), Analytics[Resultado] = "Resolved")
+		formatString: #,0.00
+		displayFolder: KPIs
+
+	measure UrgenciaAlta = CALCULATE(SUM(Analytics[Conversaciones]), Analytics[Urgencia] = "high")
+		formatString: #,0.00
+		displayFolder: KPIs
+
+	partition Analytics = m
+		mode: import
+		source =
+			let
+			    Source = Csv.Document(File.Contents(DataFolder & "analytics.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+			    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+			    Typed = Table.TransformColumnTypes(Headers, {{"Canal", type text}, {"Sentimiento", type text}, {"Urgencia", type text}, {"Resultado", type text}, {"Conversaciones", Int64.Type}}, "en-US")
+			in
+			    Typed
