@@ -3,9 +3,9 @@
   "name": "chart2",
   "position": {
     "x": 30,
-    "y": 160,
+    "y": 180,
     "z": 3,
-    "height": 280,
+    "height": 325,
     "width": 600,
     "tabOrder": 3
   },
