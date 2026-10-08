@@ -3,5 +3,12 @@ model Model
 	defaultPowerBIDataSourceVersion: powerBI_V3
 	sourceQueryCulture: en-US
 
-ref table Analytics
+ref table Conversaciones
+ref table Calidad
+ref table Terminos
+ref table Bigramas
+ref table Temas
+ref table SentimientosNLP
+ref table ComparacionCanales
+ref table Posteriores
 ref expression DataFolder

@@ -1,0 +1,39 @@
+table Calidad
+
+	column 'Campo'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Campo
+
+	column 'Nulos'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Nulos
+
+	column 'Unicos'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Unicos
+
+	column 'Filas'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Filas
+
+	measure KPI_Nulos = SUM(Calidad[Nulos])
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	measure KPI_Unicos = MAX(Calidad[Unicos])
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	partition Calidad = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "Calidad.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"Campo", type text}, {"Nulos", type number}, {"Unicos", type number}, {"Filas", type number}}, "en-US")
+				in
+				    Typed

@@ -1,0 +1,25 @@
+table SentimientosNLP
+
+	column 'etiqueta'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: etiqueta
+
+	column 'Mensajes'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Mensajes
+
+	measure KPI_Mensajes = SUM(SentimientosNLP[Mensajes])
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	partition SentimientosNLP = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "SentimientosNLP.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"etiqueta", type text}, {"Mensajes", type number}}, "en-US")
+				in
+				    Typed

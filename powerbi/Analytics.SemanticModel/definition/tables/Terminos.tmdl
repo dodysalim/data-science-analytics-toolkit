@@ -1,0 +1,25 @@
+table Terminos
+
+	column 'termino'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: termino
+
+	column 'tfidf_prom'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: tfidf_prom
+
+	measure KPI_tfidf_prom = MAX(Terminos[tfidf_prom])
+		formatString: #,0.0000
+		displayFolder: Indicadores
+
+	partition Terminos = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "Terminos.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"termino", type text}, {"tfidf_prom", type number}}, "en-US")
+				in
+				    Typed

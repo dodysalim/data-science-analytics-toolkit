@@ -1,7 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.0.0/schema.json",
   "pageOrder": [
-    "overview"
+    "resumen",
+    "distribucion",
+    "sentimientos",
+    "urgencia",
+    "nlp",
+    "ab",
+    "calidad"
   ],
-  "activePageName": "overview"
+  "activePageName": "resumen"
 }
