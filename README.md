@@ -12,6 +12,10 @@
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/pandas-150458?style=flat-square&logo=pandas&logoColor=white" alt="pandas"> <img src="https://img.shields.io/badge/NLP-8F7BFF?style=flat-square&logoColor=white" alt="NLP"> <img src="https://img.shields.io/badge/SQL-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="SQL"> <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit"> <img src="https://img.shields.io/badge/Power_BI-F2C811?style=flat-square&logoColor=black" alt="Power BI">
 </p>
 
+<p align="center">
+<a href="https://github.com/dodysalim/data-science-analytics-toolkit/actions"><img src="https://github.com/dodysalim/data-science-analytics-toolkit/actions/workflows/tests.yml/badge.svg" alt="CI"></a> <img src="https://img.shields.io/badge/versión-1.1.0-8F7BFF?style=flat-square" alt="Versión 1.1.0"> <img src="https://img.shields.io/badge/licencia-MIT-30405B?style=flat-square" alt="Licencia MIT">
+</p>
+
 <p align="center"><a href="https://dodysalim.github.io/"><b>🌐 Portafolio</b></a> · <a href="docs/PORTFOLIO_CASE.md"><b>📄 Caso de estudio</b></a> · <a href="docs/VALIDATION.md"><b>✅ Verificación</b></a></p>
 
 ---
@@ -71,10 +75,11 @@ El CSV grande requiere Git LFS. También puedes definir CUSTOMER_SUPPORT_DATA co
 | [src/modules/](src/modules/) | Motores reutilizables |
 | [notebooks/](notebooks/) | EDA, SQL y soporte |
 | [data/](data/) | Dataset versionado mediante LFS |
+| [tests/](tests/) | Pruebas de los módulos |
 
 ## ✅ Calidad y alcance
 
-Siete vistas probadas sin excepciones con una muestra de 50.000 filas originales. No existe cobertura global de pruebas para todos los módulos.
+Siete vistas probadas sin excepciones con una muestra de 50.000 filas originales. 9 pruebas automatizadas cubren limpieza, estadística, A/B y perfilado; se ejecutan en CI en cada cambio.
 
 Las conversaciones se deduplican por conv_id para los KPIs. La comparación A/B es observacional y no demuestra causalidad. El NLP usa un subconjunto; las tablas precalculadas de Power BI conservan ese alcance.
 

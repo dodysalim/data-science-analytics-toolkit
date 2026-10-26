@@ -14,3 +14,12 @@ __pycache__/
 # Outputs generados
 06_customer_support_analysis/output/
 06_customer_support_analysis/reports/
+
+# Mantenimiento
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+*.log

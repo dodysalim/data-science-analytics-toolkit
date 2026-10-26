@@ -72,16 +72,22 @@ def fill_nulls_smart(df: pd.DataFrame, strategy: str = 'auto') -> pd.DataFrame:
 
         if pd.api.types.is_numeric_dtype(df[col]):
             if strategy == 'median':
-                df[col].fillna(df[col].median(), inplace=True)
+                value = df[col].median()
             elif strategy == 'zero':
-                df[col].fillna(0, inplace=True)
-            else:  # auto o mode
-                df[col].fillna(df[col].mean(), inplace=True)
+                value = 0
+            elif strategy == 'mode':
+                mode = df[col].mode()
+                value = mode.iloc[0] if not mode.empty else 0
+            else:  # auto
+                value = df[col].mean()
         else:
             if strategy == 'zero':
-                df[col].fillna('Unknown', inplace=True)
+                value = 'Unknown'
             else:
-                df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else 'Unknown', inplace=True)
+                mode = df[col].mode()
+                value = mode.iloc[0] if not mode.empty else 'Unknown'
+        # Asignación explícita: compatible con copy-on-write de pandas 2.x/3.x
+        df[col] = df[col].fillna(value)
 
     print(f"✅ Valores nulos tratados con estrategia '{strategy}'.")
     return df
