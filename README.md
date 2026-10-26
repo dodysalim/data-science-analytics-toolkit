@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/dodysalim/data-science-analytics-toolkit/actions"><img src="https://github.com/dodysalim/data-science-analytics-toolkit/actions/workflows/tests.yml/badge.svg" alt="CI"></a> <img src="https://img.shields.io/badge/versión-1.1.0-8F7BFF?style=flat-square" alt="Versión 1.1.0"> <img src="https://img.shields.io/badge/licencia-MIT-30405B?style=flat-square" alt="Licencia MIT">
+<a href="https://github.com/dodysalim/data-science-analytics-toolkit/actions"><img src="https://github.com/dodysalim/data-science-analytics-toolkit/actions/workflows/tests.yml/badge.svg" alt="CI"></a> <img src="https://img.shields.io/badge/versión-1.2.0-8F7BFF?style=flat-square" alt="Versión 1.2.0"> <img src="https://img.shields.io/badge/licencia-MIT-30405B?style=flat-square" alt="Licencia MIT">
 </p>
 
 <p align="center"><a href="https://dodysalim.github.io/"><b>🌐 Portafolio</b></a> · <a href="docs/PORTFOLIO_CASE.md"><b>📄 Caso de estudio</b></a> · <a href="docs/VALIDATION.md"><b>✅ Verificación</b></a></p>
@@ -79,7 +79,7 @@ El CSV grande requiere Git LFS. También puedes definir CUSTOMER_SUPPORT_DATA co
 
 ## ✅ Calidad y alcance
 
-Siete vistas probadas sin excepciones con una muestra de 50.000 filas originales. 9 pruebas automatizadas cubren limpieza, estadística, A/B y perfilado; se ejecutan en CI en cada cambio.
+Siete vistas probadas sin excepciones con una muestra de 50.000 filas originales. 12 pruebas automatizadas cubren limpieza, estadística, A/B, perfilado y los cálculos del dashboard; se ejecutan en CI en cada cambio.
 
 Las conversaciones se deduplican por conv_id para los KPIs. La comparación A/B es observacional y no demuestra causalidad. El NLP usa un subconjunto; las tablas precalculadas de Power BI conservan ese alcance.
 

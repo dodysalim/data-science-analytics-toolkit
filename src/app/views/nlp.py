@@ -1,6 +1,7 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 from nlp_toolkit import NLPPipeline, LexiconSentimentScorer
+
+from .components import fig_pie, show
 
 def render_nlp(df_raw, df):
     st.title("💬 Analisis de Texto — NLP Real")
@@ -33,16 +34,13 @@ def render_nlp(df_raw, df):
         pipeline_nlp = NLPPipeline(n_temas=4, max_features=500)
         res_nlp = pipeline_nlp.ejecutar(textos)
 
-    ok_color = {"negative":"#ef4444","neutral":"#f59e0b","positive":"#22c55e"}
+    nlp_colors = {"negativo": "#FF8A80", "neutral": "#F8D66D", "positivo": "#75E6CE",
+                  "negative": "#FF8A80", "positive": "#75E6CE"}
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Sentimientos detectados por NLP")
         dist = res_nlp["sentimientos"]["etiqueta"].value_counts()
-        fig, ax = plt.subplots(figsize=(4,4))
-        ax.pie(dist.values, labels=dist.index, autopct="%1.1f%%",
-               colors=[ok_color.get(l,"#2563eb") for l in dist.index],
-               wedgeprops={"width":0.55,"edgecolor":"white"})
-        st.pyplot(fig); plt.close()
+        show(fig_pie(dist, "Sentimiento (léxico)", colors=[nlp_colors.get(l, "#88B7FF") for l in dist.index]))
     with col2:
         st.subheader("Temas descubiertos (LDA)")
         st.dataframe(res_nlp["temas"], use_container_width=True)

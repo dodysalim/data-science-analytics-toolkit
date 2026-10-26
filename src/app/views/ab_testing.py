@@ -1,8 +1,8 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from ab_testing import FrequentistABTester, BayesianABTester
+
+from .components import fig_posteriors, show
 
 def render_ab_testing(df_raw, df):
     st.title("🧪 Prueba A/B — Comparacion de Canales")
@@ -57,13 +57,7 @@ def render_ab_testing(df_raw, df):
     x = np.linspace(
         max(0, min(conv_a/n_a, conv_b/n_b) - 0.05),
         min(1, max(conv_a/n_a, conv_b/n_b) + 0.05), 300)
-    fig, ax = plt.subplots(figsize=(9,3))
-    ax.fill_between(x, beta_dist.pdf(x, 1+conv_a, 1+n_a-conv_a),
-                    alpha=0.6, color="#94a3b8", label=f"{canal_a} (Control)")
-    ax.fill_between(x, beta_dist.pdf(x, 1+conv_b, 1+n_b-conv_b),
-                    alpha=0.6, color="#2563eb", label=f"{canal_b} (Tratamiento)")
-    ax.legend(); ax.set_title("Distribuciones Posteriores Beta", fontweight="bold")
-    ax.set_xlabel("Tasa de resolucion")
-    sns.despine(); fig.tight_layout()
-    st.pyplot(fig); plt.close()
+    show(fig_posteriors([(f"{canal_a} (Control)", x, beta_dist.pdf(x, 1+conv_a, 1+n_a-conv_a), "#93A1BD"),
+                         (f"{canal_b} (Tratamiento)", x, beta_dist.pdf(x, 1+conv_b, 1+n_b-conv_b), "#75E6CE")],
+                        "Distribuciones Posteriores Beta"))
     st.info(f"Recomendacion: {res_bay['recomendacion']}")

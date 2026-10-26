@@ -23,6 +23,7 @@ from views.resultados import render_resultados
 from views.nlp import render_nlp
 from views.ab_testing import render_ab_testing
 from views.calidad import render_calidad
+from views.theme import CSS
 
 # ── Config ────────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -32,39 +33,21 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown("""
-<style>
-[data-testid="stAppViewContainer"] { background:#f8fafc; color:#1e293b; }
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg,#1e3a5f 0%,#2563eb 100%);
-}
-[data-testid="stSidebar"] * { color:#ffffff !important; }
-[data-testid="metric-container"] {
-    background:#ffffff; border:1px solid #e2e8f0;
-    border-radius:12px; padding:16px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.06);
-}
-h1 { color:#1e3a5f !important; border-bottom:3px solid #2563eb; padding-bottom:8px; }
-h2,h3 { color:#1e40af !important; }
-hr  { border-color:#bfdbfe; }
-.stButton>button {
-    background:#2563eb; color:white; border-radius:8px;
-    border:none; padding:8px 24px; font-weight:600;
-}
-</style>
-""", unsafe_allow_html=True)
+st.markdown(CSS, unsafe_allow_html=True)
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 st.sidebar.title("🎧 Customer Support Analytics")
-pagina = st.sidebar.radio("Seccion", [
-    "🏠 Resumen Ejecutivo",
-    "📊 Distribucion de Tickets",
-    "😊 Analisis de Sentimientos",
-    "⏱️ Urgencia & Resultados",
-    "💬 Analisis de Texto (NLP)",
-    "🧪 Prueba A/B de Canales",
-    "🔍 Perfil de Calidad",
-])
+# Registro de páginas: agregar una vista = agregar una entrada
+PAGES = {
+    "🏠 Resumen Ejecutivo": render_resumen,
+    "📊 Distribucion de Tickets": render_distribucion,
+    "😊 Analisis de Sentimientos": render_sentimientos,
+    "⏱️ Urgencia & Resultados": render_resultados,
+    "💬 Analisis de Texto (NLP)": render_nlp,
+    "🧪 Prueba A/B de Canales": render_ab_testing,
+    "🔍 Perfil de Calidad": render_calidad,
+}
+pagina = st.sidebar.radio("Seccion", list(PAGES))
 st.sidebar.divider()
 
 n_filas = st.sidebar.slider("Filas a cargar (miles)", 10, 200, 50) * 1000
@@ -91,17 +74,4 @@ except (OSError, ValueError) as exc:
     st.stop()
 
 # ── Router ────────────────────────────────────────────────────────────────────
-if pagina == "🏠 Resumen Ejecutivo":
-    render_resumen(df_raw, df)
-elif pagina == "📊 Distribucion de Tickets":
-    render_distribucion(df_raw, df)
-elif pagina == "😊 Analisis de Sentimientos":
-    render_sentimientos(df_raw, df)
-elif pagina == "⏱️ Urgencia & Resultados":
-    render_resultados(df_raw, df)
-elif pagina == "💬 Analisis de Texto (NLP)":
-    render_nlp(df_raw, df)
-elif pagina == "🧪 Prueba A/B de Canales":
-    render_ab_testing(df_raw, df)
-elif pagina == "🔍 Perfil de Calidad":
-    render_calidad(df_raw, df)
+PAGES[pagina](df_raw, df)
