@@ -12,4 +12,3 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [
 - Flujo de CI que corre las pruebas en cada cambio (no requiere descargar el CSV de LFS).
 - Verificación: las 7 vistas del dashboard abren sin excepciones con el dataset real.
 - Licencia MIT e insignias en el README.
-
