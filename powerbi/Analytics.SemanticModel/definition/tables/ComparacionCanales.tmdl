@@ -1,0 +1,86 @@
+table ComparacionCanales
+
+	column 'Comparacion'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Comparacion
+
+	column 'Control'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Control
+
+	column 'Tratamiento'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Tratamiento
+
+	column 'N_A'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: N_A
+
+	column 'N_B'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: N_B
+
+	column 'Resueltos_A'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Resueltos_A
+
+	column 'Resueltos_B'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Resueltos_B
+
+	column 'Tasa_A'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Tasa_A
+
+	column 'Tasa_B'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Tasa_B
+
+	column 'Diferencia'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Diferencia
+
+	column 'Z'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Z
+
+	column 'PValue'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: PValue
+
+	column 'IC95Inferior'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: IC95Inferior
+
+	column 'IC95Superior'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: IC95Superior
+
+	column 'Prob_B_Supera_A'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Prob_B_Supera_A
+
+	partition ComparacionCanales = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "ComparacionCanales.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"Comparacion", type text}, {"Control", type text}, {"Tratamiento", type text}, {"N_A", type number}, {"N_B", type number}, {"Resueltos_A", type number}, {"Resueltos_B", type number}, {"Tasa_A", type number}, {"Tasa_B", type number}, {"Diferencia", type number}, {"Z", type number}, {"PValue", type number}, {"IC95Inferior", type number}, {"IC95Superior", type number}, {"Prob_B_Supera_A", type number}}, "en-US")
+				in
+				    Typed

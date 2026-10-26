@@ -1,0 +1,17 @@
+Campo,Nulos,Unicos,Filas
+conv_id,0,3562,50000
+turn_index,0,18,50000
+role,0,2,50000
+text,0,50000,50000
+timestamp,0,43374,50000
+industry,0,8,50000
+product,0,51,50000
+issue_type,0,15,50000
+language,0,3,50000
+channel,0,5,50000
+customer_name,0,3561,50000
+agent_name,0,3548,50000
+overall_sentiment,0,3,50000
+overall_urgency,0,4,50000
+outcome,0,5,50000
+primary_intent,0,14,50000

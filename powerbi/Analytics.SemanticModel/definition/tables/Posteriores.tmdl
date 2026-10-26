@@ -1,0 +1,35 @@
+table Posteriores
+
+	column 'Comparacion'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Comparacion
+
+	column 'Canal'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Canal
+
+	column 'Tasa'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Tasa
+
+	column 'Densidad'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Densidad
+
+	measure KPI_Densidad = MAX(Posteriores[Densidad])
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	partition Posteriores = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "Posteriores.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"Comparacion", type text}, {"Canal", type text}, {"Tasa", type number}, {"Densidad", type number}}, "en-US")
+				in
+				    Typed

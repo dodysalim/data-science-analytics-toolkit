@@ -1,0 +1,34 @@
+table Bigramas
+
+	column 'ngrama'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: ngrama
+
+	column 'conteo'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: conteo
+
+	column 'frecuencia'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: frecuencia
+
+	measure KPI_conteo = MAX(Bigramas[conteo])
+		formatString: #,0.0000
+		displayFolder: Indicadores
+
+	measure KPI_frecuencia = MAX(Bigramas[frecuencia])
+		formatString: #,0.0000
+		displayFolder: Indicadores
+
+	partition Bigramas = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "Bigramas.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"ngrama", type text}, {"conteo", type number}, {"frecuencia", type number}}, "en-US")
+				in
+				    Typed

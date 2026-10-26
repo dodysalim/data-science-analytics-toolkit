@@ -1,0 +1,16 @@
+{
+  "repo": "data-science-analytics-toolkit",
+  "pages": 7,
+  "visuals": 66,
+  "tables": {
+    "Conversaciones": 3562,
+    "Calidad": 16,
+    "Terminos": 20,
+    "Bigramas": 20,
+    "Temas": 4,
+    "SentimientosNLP": 2,
+    "ComparacionCanales": 20,
+    "Posteriores": 4800
+  },
+  "status": "Muestra: primeras 50.000 filas del CSV original · una fila por conversación · NLP: primeros 500 mensajes de clientes"
+}

@@ -1,0 +1,87 @@
+table Conversaciones
+
+	column 'industry'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: industry
+
+	column 'product'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: product
+
+	column 'issue_type'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: issue_type
+
+	column 'language'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: language
+
+	column 'channel'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: channel
+
+	column 'overall_sentiment'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: overall_sentiment
+
+	column 'overall_urgency'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: overall_urgency
+
+	column 'outcome'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: outcome
+
+	column 'primary_intent'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: primary_intent
+
+	column 'Mes'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Mes
+
+	column 'Hora'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Hora
+
+	column 'Resuelto'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: Resuelto
+
+	measure KPI_Conversaciones = COUNTROWS(Conversaciones)
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	measure KPI_Resueltos = SUM(Conversaciones[Resuelto])
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	measure KPI_Resolucion = DIVIDE(SUM(Conversaciones[Resuelto]), COUNTROWS(Conversaciones))
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	measure KPI_Negativos = CALCULATE(COUNTROWS(Conversaciones), Conversaciones[overall_sentiment]="negative")
+		formatString: #,0.00
+		displayFolder: Indicadores
+
+	partition Conversaciones = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "Conversaciones.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"industry", type text}, {"product", type text}, {"issue_type", type text}, {"language", type text}, {"channel", type text}, {"overall_sentiment", type text}, {"overall_urgency", type text}, {"outcome", type text}, {"primary_intent", type text}, {"Mes", type text}, {"Hora", type number}, {"Resuelto", type number}}, "en-US")
+				in
+				    Typed

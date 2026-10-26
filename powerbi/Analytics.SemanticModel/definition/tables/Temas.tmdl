@@ -1,0 +1,25 @@
+table Temas
+
+	column 'id_tema'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: id_tema
+
+	column 'palabras_top'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: palabras_top
+
+	measure KPI_id_tema = MAX(Temas[id_tema])
+		formatString: #,0.0000
+		displayFolder: Indicadores
+
+	partition Temas = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "Temas.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"id_tema", type number}, {"palabras_top", type text}}, "en-US")
+				in
+				    Typed
