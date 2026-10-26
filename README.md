@@ -67,6 +67,21 @@ El CSV grande requiere Git LFS. También puedes definir CUSTOMER_SUPPORT_DATA co
 
 [Archivos e instrucciones](powerbi/README.md). Descarga el repositorio completo y abre `powerbi/Abrir-PowerBI.bat` en Windows; después pulsa **Actualizar**. Incluye A4 horizontal a tamaño real (100 %) y diseño móvil vertical. El archivo `.pbip` necesita sus carpetas Report, SemanticModel y data.
 
+## 🏗️ Arquitectura
+
+```mermaid
+flowchart LR
+    CSV[(customer_support_data.csv<br/>Git LFS)] --> LOAD["Carga y deduplicación<br/>por conversación"]
+    subgraph src/modules
+        CL[Limpieza] & ST[Estadística] & AB[Pruebas A/B] & NLP[NLP] & PR[Perfilado]
+    end
+    LOAD --> REG{{"Registro de páginas"}}
+    REG --> VIEWS["views<br/>7 vistas"]
+    VIEWS --> AN["analytics<br/>cálculos puros"] & CH["components<br/>fábrica Plotly"] & TH["theme"]
+    AB & NLP & PR --> VIEWS
+    VIEWS --> APP([Streamlit])
+```
+
 ## 🧭 Estructura del repositorio
 
 | Ruta | Qué contiene |
