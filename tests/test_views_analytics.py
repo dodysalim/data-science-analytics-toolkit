@@ -27,7 +27,7 @@ def test_share_table_rows_sum_to_one_and_respect_order():
 
 
 def test_rate_by_and_monthly_rate():
-    assert analytics.rate_by(DF, "channel", "outcome", "Resolved").to_dict() == {"email": 200 / 3, "chat": 50.0}
+    assert analytics.rate_by(DF, "channel", "outcome", "Resolved").round(2).to_dict() == {"email": 66.67, "chat": 50.0}
     assert analytics.monthly_rate(DF, "overall_sentiment", "negative").round(2).to_dict() == {"2025-01": 50.0, "2025-02": 66.67}
 
 
