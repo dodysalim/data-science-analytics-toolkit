@@ -1,7 +1,0 @@
-output/
-reports/
-__pycache__/
-*.pyc
-*.pyo
-.env
-*.joblib
