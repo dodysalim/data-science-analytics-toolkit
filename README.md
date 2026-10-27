@@ -16,7 +16,7 @@
 <a href="https://github.com/dodysalim/data-science-analytics-toolkit/actions"><img src="https://github.com/dodysalim/data-science-analytics-toolkit/actions/workflows/tests.yml/badge.svg" alt="CI"></a> <img src="https://img.shields.io/badge/versión-1.2.0-8F7BFF?style=flat-square" alt="Versión 1.2.0"> <img src="https://img.shields.io/badge/licencia-MIT-30405B?style=flat-square" alt="Licencia MIT">
 </p>
 
-<p align="center"><a href="https://dodysalim.github.io/"><b>🌐 Portafolio</b></a> · <a href="docs/PORTFOLIO_CASE.md"><b>📄 Caso de estudio</b></a> · <a href="docs/VALIDATION.md"><b>✅ Verificación</b></a></p>
+<p align="center"><a href="https://dodysalim.github.io/"><b>🌐 Portafolio</b></a> · <a href="docs/PORTFOLIO_CASE.md"><b>📄 Caso de estudio</b></a> · <a href="docs/VALIDATION.md"><b>✅ Verificación</b></a> · <a href="README.en.md"><b>🇺🇸 English</b></a></p>
 
 ---
 
