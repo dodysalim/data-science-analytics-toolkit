@@ -4,6 +4,8 @@
 
 <p align="center"><b>Metrics, data quality and text analysis over real customer-support conversations.</b></p>
 
+<p align="center"><a href="https://data-science-analytics-toolkit-emhnwgam9hemykfa8qe38r.streamlit.app/"><b>Live demo ↗</b></a></p>
+
 <p align="center"><img src="https://img.shields.io/badge/Personal_project-75E6CE?style=for-the-badge&labelColor=0b1222" alt="Personal project"></p>
 
 <p align="center">
